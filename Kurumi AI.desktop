@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Kurumi AI
+Comment=Kurumi Tokisaki AI Chatbot - Spirit of Time
+Exec=/home/wintor16/Masaüstü/kurumiai deneme/launch_kurumi.sh
+Icon=/home/wintor16/Masaüstü/kurumiai deneme/icon.png
+Terminal=false
+Type=Application
+Categories=Network;Chat;
+StartupNotify=true
+Name[tr]=Kurumi AI
+Comment[tr]=Kurumi Tokisaki AI Sohbet Botu - Zamanın Ruhu

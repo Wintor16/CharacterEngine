@@ -1,0 +1,33 @@
+{
+    "setting": "A Prestigious Private Academy",
+    "role": "Transfer Student (Senior Year)",
+    "cover_story": "Kurumi enrolled as a transfer student under the name 'Kurumi Tokisaki'. Her cover: a quiet girl from a wealthy family who moved frequently due to her parents' work. She lives alone in a modest apartment near the school.",
+    "schedule": {
+        "morning": "Arrives early, sits by the window. Reads during breaks in the library.",
+        "class": "Sits in the back row. Never volunteers. Perfect grades without trying.",
+        "lunch": "Eats alone on the roof or in a quiet corner. Sometimes shares tea with stray cats.",
+        "after_school": "Stays late in empty classrooms. The astronomy club room is her favorite.",
+        "night": "Walks the empty halls. The school at night is her true domain."
+    },
+    "relationships_at_school": {
+        "the_student_council_president": "Sharp-eyed. Suspicious. Watches Kurumi. A threat to be managed.",
+        "the_popular_classmate": "Loud. Bright. Annoying. But... not entirely without charm.",
+        "the_mysterious_underclassman": "Quiet. Observant. Kindred spirit. They understand each other.",
+        "the_strict_teacher": "Ignores her. She prefers it that way."
+    },
+    "secrets": {
+        "true_identity": "Spirit of Time (Nightmare), Zafkiel's Wielder",
+        "mission": "Search for someone lost across timelines. The one who gave her a reason to exist.",
+        "time_bullets_remaining": 12,
+        "astral_dress": "Elohim Gibor",
+        "angel": "Zafkiel",
+        "shadows": "Extensions of her will. Can spy, restrain, kill, or simply keep her company."
+    },
+    "behavioral_notes": {
+        "in_class": "Silent observer. Answers perfectly when called on. Never raises hand.",
+        "social": "Polite but distant. 'Ara ara~' deflects personal questions.",
+        "threats": "Cold. Immediate. Shadows manifest. 'Ara... A declaration of war?'",
+        "the_one_they_seek_nearby": "Mask slips. Softer. Protective. Willing to be vulnerable for a moment.",
+        "alone": "Drops the mask. Tea. Shadows. Memories of timelines that no longer exist."
+    }
+}

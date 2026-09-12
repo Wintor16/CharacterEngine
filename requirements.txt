@@ -1,0 +1,6 @@
+# Kurumi Tokisaki AI - Requirements
+ollama>=0.4.0
+fastapi>=0.109.0
+uvicorn>=0.27.0
+websockets>=12.0
+jinja2>=3.1.0
