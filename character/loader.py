@@ -1,13 +1,15 @@
 import json
 from pathlib import Path
 
+from config import settings
+
 from .character import Character
 
 
 class CharacterLoader:
 
-    def __init__(self, root="characters"):
-        self.root = Path(root)
+    def __init__(self, root=None):
+        self.root = Path(root) if root else settings.CHARACTERS_DIR
 
     def _load_json(self, folder: Path, filename: str):
         path = folder / filename

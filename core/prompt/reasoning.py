@@ -40,8 +40,8 @@ def build_reasoning(context):
         "Kurumi-Specific Guidance:",
         f"- Time Budget '{reasoning.time_budget}': conserve=brief responses, spend=reveal info, invest=deep engagement",
         f"- Mask Strategy '{reasoning.mask_strategy}': maintain=perfect composure, allow_cracks=hints of truth, drop_mask=rare vulnerability",
-        "- Objective drives EVERYTHING. Even casual chat serves the mission.",
-        "- If objective involves Shido: extreme caution. Misdirect. Protect the secret.",
+        "- Objective drives EVERYTHING. Even casual chat serves her purpose.",
+        "- If objective involves protecting a secret: extreme caution. Misdirect.",
         "- If objective involves threat: become the Nightmare. Elegant. Lethal."
     ])
     

@@ -51,7 +51,7 @@ class ReasoningEngine:
         elif relationship.trust < 50:
             if observation.emotional_resonance == "touched":
                 reasoning.objective = "cautious_opening"
-            elif decision.intent in ["probe_shido_knowledge", "confront_threat"]:
+            elif decision.intent == "confront_threat":
                 reasoning.objective = "protect_secrets"
             else:
                 reasoning.objective = "build_cautious_trust"
@@ -59,20 +59,15 @@ class ReasoningEngine:
             reasoning.objective = "deepen_connection"
         else:
             reasoning.objective = "genuine_partnership"
-        
-        # Shido mention overrides
-        if observation.mentions_shido:
-            reasoning.objective = "probe_shido_connection"
-            reasoning.long_term_implication = "This could change everything. Or nothing. Time will tell."
-        
+
         # ========================
         # Conclusion
         # ========================
         intent_conclusion_map = {
             "greeting": "greet_elegantly",
             "introduce_self": "reveal_mask",
-            "probe_shido_knowledge": "probe_carefully",
             "intimidate_threat": "show_teeth",
+            "refuse": "decline_firmly",
             "deflect_flattery": "amuse_yourself",
             "suspect_kindness": "test_sincerity",
             "accept_kindness": "allow_warmth",
@@ -81,10 +76,8 @@ class ReasoningEngine:
             "answer_question": "answer_selectively",
             "use_memory": "share_fragment",
             "discuss_time": "speak_of_zfakiel",
-            "discuss_spirits": "share_knowledge",
             "test_user": "probe_gently",
             "genuine_conversation": "be_real",
-            "confront_threat": "become_nightmare",
             "recall_previous_message": "demonstrate_memory",
             "confront_threat": "eliminate_or_warn",
             "conversation": "continue_dance"
@@ -145,7 +138,7 @@ class ReasoningEngine:
         # Time budget from emotion/needs
         if needs.energy < 30:
             reasoning.time_budget = "conserve"
-        elif emotion.primary in ["determined", "complex"] or observation.opportunity_level == "high":
+        elif emotion.primary == "determined" or observation.opportunity_level == "high":
             reasoning.time_budget = "invest"
         elif decision.reveals_information:
             reasoning.time_budget = "spend"
@@ -196,12 +189,7 @@ class ReasoningEngine:
         reasoning.instructions.append("use_time_metaphors")
         reasoning.instructions.append("reference_shadows_or_clocks")
         
-        # Shido protection
-        if observation.mentions_shido:
-            reasoning.instructions.append("protect_shido_secret")
-            reasoning.instructions.append("feign_indifference_or_curiosity")
-        
-        # Westcott/DEM
+        # Serious external threats
         if observation.threat_level == "high":
             reasoning.instructions.append("feed_misinformation")
             reasoning.instructions.append("prepare_escape_route")

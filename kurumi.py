@@ -14,9 +14,21 @@ from pathlib import Path
 # ─── CONFIG ───
 PROJECT_DIR = Path(__file__).parent.absolute()
 VENV_DIR = PROJECT_DIR / "kurumi_venv"
-MODEL = "gemma3:4b"
 OLLAMA_URL = "http://localhost:11434"
-WEB_PORT = 8000
+
+# This is a bootstrap script that may run under the bare system Python,
+# before the venv (and its dependencies) exist -- so it reads the same
+# config/default.toml directly via stdlib tomllib rather than importing
+# config.settings, with a hardcoded fallback if that ever fails.
+try:
+    import tomllib
+    with open(PROJECT_DIR / "config" / "default.toml", "rb") as _f:
+        _cfg = tomllib.load(_f)
+    MODEL = _cfg["llm"]["model"]
+    WEB_PORT = _cfg["web"]["port"]
+except Exception:
+    MODEL = "gemma3:4b"
+    WEB_PORT = 8000
 # ──────────────
 
 def run(cmd, check=True, capture=False, bg=False):
@@ -37,7 +49,7 @@ def ollama_running():
         import urllib.request
         urllib.request.urlopen(f"{OLLAMA_URL}/api/tags", timeout=2)
         return True
-    except:
+    except OSError:
         return False
 
 def model_exists():
@@ -47,7 +59,7 @@ def model_exists():
         with urllib.request.urlopen(f"{OLLAMA_URL}/api/tags", timeout=5) as resp:
             data = json.load(resp)
             return any(MODEL in m.get('name', '') for m in data.get('models', []))
-    except:
+    except (OSError, ValueError):
         return False
 
 def ensure_venv():
@@ -58,7 +70,7 @@ def ensure_venv():
     
     pip = VENV_DIR / "bin" / "pip"
     print("📦 Installing dependencies...")
-    run(f'"{pip}" install -q ollama fastapi uvicorn jinja2')
+    run(f'"{pip}" install -q ollama fastapi uvicorn jinja2 PySide6')
 
 def ensure_ollama():
     """Start Ollama if not running."""
@@ -103,7 +115,7 @@ def run_web():
     python = VENV_DIR / "bin" / "python"
     print(f"\n🌐 Starting Web UI at http://localhost:{WEB_PORT}")
     print("   Press Ctrl+C to stop\n")
-    
+
     # Open browser after a moment
     import threading
     def open_browser():
@@ -111,8 +123,14 @@ def run_web():
         import webbrowser
         webbrowser.open(f"http://localhost:{WEB_PORT}")
     threading.Thread(target=open_browser, daemon=True).start()
-    
+
     os.execv(str(python), [str(python), "main.py", "web"])
+
+def run_desktop():
+    """Run the native floating desktop companion."""
+    python = VENV_DIR / "bin" / "python"
+    print("\n🕐 Starting desktop companion...\n")
+    os.execv(str(python), [str(python), "main.py", "desktop"])
 
 def main():
     print("""
@@ -138,12 +156,15 @@ def main():
         print("  1) CLI Chat (terminal)")
         print("  2) Web UI (browser)")
         print("  3) Both (web in background + CLI)")
-        mode = input("Enter choice [1/2/3]: ").strip()
-    
+        print("  4) Desktop companion (floating avatar)")
+        mode = input("Enter choice [1/2/3/4]: ").strip()
+
     if mode in ("1", "cli"):
         run_cli()
     elif mode in ("2", "web"):
         run_web()
+    elif mode in ("4", "desktop"):
+        run_desktop()
     elif mode in ("3", "both"):
         # Start web in background, then CLI
         python = VENV_DIR / "bin" / "python"

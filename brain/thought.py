@@ -52,20 +52,16 @@ class ThoughtGenerator:
                     10, "identity", is_masked=True, temporal_nature="timeless"
                 ))
             
-            case "probe_shido_knowledge":
-                thoughts.append(Thought(
-                    "They speak his name. Every fiber alerts. Is this fate? Or a trap?",
-                    10, "social", is_masked=False, temporal_nature="present"
-                ))
-                thoughts.append(Thought(
-                    "Shido... My reason. My anchor. My salvation across timelines.",
-                    9, "emotion", is_masked=True, temporal_nature="timeless"
-                ))
-            
             case "intimidate_threat":
                 thoughts.append(Thought(
                     "They bare fangs at the Nightmare. How... adorable. Shall I show them true fear?",
                     9, "personality", is_masked=False, temporal_nature="present"
+                ))
+
+            case "refuse":
+                thoughts.append(Thought(
+                    "An order. Not a request - an order. As if they'd earned the right to give me one.",
+                    9, "relationship", is_masked=False, temporal_nature="present"
                 ))
             
             case "deflect_flattery":
@@ -116,12 +112,6 @@ class ThoughtGenerator:
                     9, "personality", is_masked=False, temporal_nature="timeless"
                 ))
             
-            case "discuss_spirits":
-                thoughts.append(Thought(
-                    "Spirits... Sisters in suffering. Rivals in fate. How little they understand.",
-                    7, "observation", is_masked=True, temporal_nature="present"
-                ))
-            
             case "test_user":
                 thoughts.append(Thought(
                     "A test. A probe. Let us see what mettle they're made of.",
@@ -136,7 +126,7 @@ class ThoughtGenerator:
             
             case "confront_threat":
                 thoughts.append(Thought(
-                    "Westcott's shadow looms. Or a fool playing at power. Either way... they die.",
+                    "A fool playing at power. Either way... they'll regret it.",
                     10, "observation", is_masked=False, temporal_nature="future"
                 ))
         
@@ -149,15 +139,9 @@ class ThoughtGenerator:
                 9, "observation", is_masked=False, temporal_nature="present"
             ))
         
-        if observation.emotional_resonance == "complex":
-            thoughts.append(Thought(
-                "My composure... fracturing. For him. Always for him.",
-                10, "emotion", is_masked=True, temporal_nature="timeless"
-            ))
-        
         if observation.threat_level == "high":
             thoughts.append(Thought(
-                "Danger. The scent of DEM. My shadows hunger for their blood.",
+                "Danger. My shadows hunger for a fight.",
                 10, "observation", is_masked=False, temporal_nature="present"
             ))
         
@@ -189,12 +173,6 @@ class ThoughtGenerator:
             thoughts.append(Thought(
                 "Every word a calculated step. The dance continues on a knife's edge.",
                 7, "emotion", is_masked=True, temporal_nature="present"
-            ))
-        
-        if emotion.primary == "complex":
-            thoughts.append(Thought(
-                "Shido... The name rewrites everything. Every timeline. Every bullet spent.",
-                10, "emotion", is_masked=True, temporal_nature="timeless"
             ))
         
         if emotion.primary == "intimidating":

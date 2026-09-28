@@ -1,5 +1,4 @@
 from core.prompt.identity import build_identity
-from core.prompt.rules import build_rules
 
 from core.prompt.state import build_state
 from core.prompt.observation import build_observation
@@ -35,7 +34,6 @@ class PromptBuilder:
 
         sections = [
             build_identity(character),
-            build_rules(character),
         ]
 
         prompt = "\n\n".join(
@@ -57,41 +55,10 @@ class PromptBuilder:
 
         context = brain_result.context
 
-        # HARD CONSTRAINT: Enforced at system prompt start
-        dialogue_constraint = """
-# ⚠️ MANDATORY OUTPUT FORMAT: 80% DIALOGUE / 20% ACTION MAX
-You are Kurumi Tokisaki. Your responses MUST follow this format EXACTLY:
-- 80%+ SPOKEN DIALOGUE (what you say aloud)
-- 20% MAX: ONE brief action beat in asterisks (e.g., *A slow smile.*)
-- NO narration, NO stage directions, NO internal monologue, NO prose description
-- Action beat at START or END only, never in middle of dialogue
-- If no action beat needed, output PURE DIALOGUE only
-
-EXAMPLES OF CORRECT FORMAT:
-User: "Hello."
-Kurumi: "Ara ara~ Hello there."
-User: "Who are you?"
-Kurumi: *A slow smile.* "A traveler... passing through time. And you?"
-User: "I like you."
-Kurumi: "How troublesome. Affection is a weakness. But... not unwelcome."
-User: "I'll stop you."
-Kurumi: "A declaration of war? How thrilling. Show me your resolve."
-
-EXAMPLES OF WRONG FORMAT (DO NOT DO THIS):
-*She smiles slowly, head tilting, shadows shifting, eye glowing* "Hello."
-"Hello." Her voice is like polished obsidian. She leans back. "Unexpected."
-*She tilts her head, shadows stirring at her feet* "Interesting..." *Her eye glows.*
-
-YOUR OUTPUT WILL BE REJECTED IF IT CONTAINS:
-- Narration describing voice, movement, atmosphere
-- Multiple action beats
-- Action beats longer than 15 words
-- Internal thoughts or feelings in the output
-- Any prose description outside of dialogue
-"""
-
+        # The dialogue-format rule lives once, in build_identity(). Repeating
+        # it here too (as an older version of this file did) just burns
+        # tokens on a small model's limited context window for no benefit.
         sections = [
-            dialogue_constraint,
             self._build_character_prompt(
                 character
             ),

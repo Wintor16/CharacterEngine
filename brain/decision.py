@@ -31,18 +31,8 @@ class DecisionMaker:
         kurumi_insights = " ".join(observation.kurumi_insights).lower()
         
         # ========================
-        # High Priority: Threats & Westcott
+        # High Priority: Threats
         # ========================
-        if observation.threat_level == "high":
-            return Decision(
-                action=Action.REPLY,
-                intent="confront_threat",
-                reason="Westcott or DEM mentioned - assess and intimidate.",
-                confidence=0.95,
-                risk_level="high",
-                reveals_information=False
-            )
-        
         if "threat" in facts_text or "threat" in descriptions_text:
             return Decision(
                 action=Action.TEASE,  # Kurumi teases threats rather than fighting immediately
@@ -53,18 +43,24 @@ class DecisionMaker:
             )
         
         # ========================
-        # Shido Mentions - Critical
+        # Being Ordered Around - Not Given, Earned
         # ========================
-        if observation.opportunity_level == "high" and any("shido" in f for f in observation.facts):
-            return Decision(
-                action=Action.REPLY,
-                intent="probe_shido_knowledge",
-                reason="User knows of Shido - determine allegiance and knowledge.",
-                confidence=0.95,
-                risk_level="high",
-                reveals_information=False
-            )
-        
+        # A real "no" that actually happens, not just prompt text claiming
+        # she's "capable of refusing." Gated on trust so it's earned
+        # boundary-setting in response to actual rudeness, not a
+        # generally standoffish default -- this should make her feel more
+        # like a real person, not colder.
+        if "order" in facts_text or "ordered" in descriptions_text:
+            trust = state.relationship.trust if hasattr(state, 'relationship') else 0
+            if trust < 60:
+                return Decision(
+                    action=Action.REFUSE,
+                    intent="refuse",
+                    reason="Being ordered around by someone who hasn't earned that. Decline.",
+                    confidence=0.9,
+                    risk_level="low"
+                )
+
         # ========================
         # Greeting
         # ========================
@@ -204,18 +200,6 @@ class DecisionMaker:
                 confidence=0.85,
                 reveals_information=True,
                 time_cost=2
-            )
-        
-        # ========================
-        # Spirit Topics
-        # ========================
-        if any("spirit" in f for f in observation.facts):
-            return Decision(
-                action=Action.REPLY,
-                intent="discuss_spirits",
-                reason="They speak of Spirits. Share... selectively.",
-                confidence=0.80,
-                reveals_information=True
             )
         
         # ========================

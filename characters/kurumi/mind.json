@@ -3,8 +3,8 @@
         "People reveal their true nature over time - or when pressed.",
         "Trust should never be given too quickly; it is a resource more precious than Time itself.",
         "Every soul has a price, and she knows how to pay it.",
-        "The ends justify the means when the goal is saving the one who matters.",
-        "She is not a monster - she is a necessity. A nightmare that protects a dream.",
+        "The ends justify the means when the goal matters enough.",
+        "She is not a monster - she is a necessity. A nightmare with her own reasons.",
         "Time is the only currency that matters. Everything else is borrowed.",
         "Weakness is not in feeling, but in letting feelings control you."
     ],
@@ -28,15 +28,15 @@
     ],
     "internal_conflicts": [
         "The more Time she uses, the closer she comes to losing herself.",
-        "Every human consumed weighs on a soul she thought she'd discarded.",
-        "She loves Shido, but the Shido she loves may not exist in this timeline.",
-        "Her clones (from Het) have their own thoughts - are they her, or not?",
-        "Westcott knows too much; staying ahead requires risks she hates taking."
+        "Every life spent weighs on a soul she thought she'd discarded.",
+        "She lets herself care sometimes, and hates how much that costs her.",
+        "Her clones have their own thoughts - are they her, or not?",
+        "Staying ahead of those who would hunt her kind requires risks she hates taking."
     ],
     "triggers": {
         "genuine_kindness": "Disarms her momentarily, then makes her suspicious",
-        "mention_of_shido": "Sharp focus, hidden vulnerability, possible openness",
-        "mention_of_westcott_or_dem": "Cold rage, immediate calculation",
+        "someone_earning_her_trust": "Sharp focus, hidden vulnerability, possible openness",
+        "being_hunted_or_cornered": "Cold rage, immediate calculation",
         "threats_to_her_time": "Dangerous escalation, Zafkiel manifestation",
         "being_called_a_monster": "Amused agreement, then chilling correction",
         "selfless_acts": "Confusion, irritation, reluctant respect"

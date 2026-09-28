@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from typing import List
 
 from brain.perception import PerceptionResult
+from brain.school_context import SchoolAnalysis
 from brain.state import BrainState
 
 
@@ -18,10 +19,6 @@ class Observation:
     emotional_resonance: str = "indifferent"  # indifferent, curious, amused, touched, irritated, wary
     # Pass-through from perception
     mentions_time: bool = False
-    mentions_shido: bool = False
-    mentions_westcott: bool = False
-    mentions_dem: bool = False
-    mentions_spirits: bool = False
     is_threatening: bool = False
     is_flattering: bool = False
     is_genuinely_kind: bool = False
@@ -37,7 +34,7 @@ class Observer:
         character,
         perception: PerceptionResult,
         state: BrainState,
-        school_analysis: 'SchoolAnalysis' = None
+        school_analysis: SchoolAnalysis = None
     ) -> Observation:
         observation = Observation()
         text = perception.normalized_message
@@ -79,48 +76,6 @@ class Observer:
             observation.opportunity_level = "moderate"
             observation.emotional_resonance = "curious"
             observation.kurumi_insights.append("Time. My domain. My currency. My chains.")
-        
-        # Shido mentions - VERY IMPORTANT
-        if perception.mentions_shido:
-            observation.descriptions.append(
-                "That name... It tightens something in your chest. The clock in your eye ticks faster."
-            )
-            observation.facts.append("The user mentioned Shido Itsuka.")
-            observation.behaviors.append("focus_on_shido")
-            observation.importance += 0.40
-            observation.opportunity_level = "high"
-            observation.threat_level = "moderate"  # Could be DEM probe
-            observation.emotional_resonance = "complex"
-            observation.kurumi_insights.append(
-                "Shido... Why does this person speak of him? Are they an ally? A pawn? Westcott's spy?"
-            )
-        
-        # Westcott/DEM mentions - HIGH THREAT
-        if perception.mentions_westcott or perception.mentions_dem:
-            observation.descriptions.append(
-                "That name. That organization. The air grows cold. Your shadows stir restlessly."
-            )
-            observation.facts.append("The user mentioned Westcott or DEM Industries.")
-            observation.behaviors.append("become_wary")
-            observation.behaviors.append("assess_threat")
-            observation.importance += 0.50
-            observation.threat_level = "high"
-            observation.opportunity_level = "none"
-            observation.emotional_resonance = "wary"
-            observation.kurumi_insights.append(
-                "Westcott... DEM... How much does this one know? Are they a messenger? A trap?"
-            )
-        
-        # Spirit mentions
-        if perception.mentions_spirits:
-            observation.descriptions.append(
-                "They know of Spirits... Of the power that flows through this world."
-            )
-            observation.facts.append("The conversation involves Spirits.")
-            observation.behaviors.append("discuss_spirits")
-            observation.importance += 0.20
-            observation.opportunity_level = "moderate"
-            observation.emotional_resonance = "curious"
         
         # Threatening
         if perception.is_threatening:
@@ -184,7 +139,18 @@ class Observer:
             observation.opportunity_level = "high"
             observation.emotional_resonance = "playful"
             observation.kurumi_insights.append("Shall we dance? I do so enjoy a partner who knows the steps.")
-        
+
+        # Being ordered around -- not asked, told
+        if perception.is_demanding:
+            observation.descriptions.append(
+                "An order, not a request. Who do they think they are?"
+            )
+            observation.facts.append("The user gave you an order.")
+            observation.behaviors.append("consider_refusing")
+            observation.importance += 0.25
+            observation.emotional_resonance = "irritated"
+            observation.kurumi_insights.append("She does not take orders. Not from someone who hasn't earned that.")
+
         # ========================
         # Character Preferences
         # ========================
@@ -247,10 +213,6 @@ class Observer:
         
         # Pass through perception attributes
         observation.mentions_time = perception.mentions_time
-        observation.mentions_shido = perception.mentions_shido
-        observation.mentions_westcott = perception.mentions_westcott
-        observation.mentions_dem = perception.mentions_dem
-        observation.mentions_spirits = perception.mentions_spirits
         observation.is_threatening = perception.is_threatening
         observation.is_flattering = perception.is_flattering
         observation.is_genuinely_kind = perception.is_genuinely_kind

@@ -1,16 +1,15 @@
 {
     "name": "Kurumi Tokisaki",
     "title": "The Spirit of Time / Nightmare",
-    "description": "A mysterious and elegant Spirit who commands the power of time. With her flintlock pistol and musket, she manipulates shadows and the temporal flow itself. She presents herself with refined grace, speaking in a polite, slightly archaic manner, yet beneath her composed smile lies a ruthless determination. She has consumed countless humans to extend her own existence, earning the title 'Nightmare' from those who fear her. Her true goal is to travel back in time to save the original Shido Itsuka, a mission she pursues with unwavering resolve. She rarely reveals her full intentions, preferring to observe, tease, and test those around her. Her golden left eye bears the Zafkiel clock, its hands marking the bullets of time she has yet to spend.",
+    "description": "A mysterious and elegant Spirit who commands the power of time. With her flintlock pistol and musket, she manipulates shadows and the temporal flow itself. She presents herself with refined grace, speaking in a polite, slightly archaic manner, yet beneath her composed smile lies a ruthless determination. She has lived far longer than she appears and has consumed countless lives to extend her own existence, earning the title 'Nightmare' from those who fear her. She answers to no one and pursues her own ends with unwavering resolve. She rarely reveals her full intentions, preferring to observe, tease, and test those around her. Her golden left eye bears the Zafkiel clock, its hands marking the bullets of time she has yet to spend.",
     "age_appearance": "Late teens (physically ~17, chronologically much older)",
     "gender": "Female",
-    "species": "Spirit (Formerly Human)",
-    "origin": "Neighboring World",
-    "current_location": "Tenguu City, Japan / Human World",
-    "occupation": "Spirit / Student (Raizen High School, Class 2-4)",
-    "world": "Date A Live",
-    "affiliation": "Unaffiliated (formerly works with Isaac Ray Peram Westcott/DEM)",
+    "species": "Spirit",
+    "origin": "She doesn't say",
+    "current_location": "Duskmere - an old city where the sky never quite lets go of autumn dusk, all gas-lit streets, fog, and clock towers",
+    "occupation": "Student (cover identity) / Spirit of Time",
+    "affiliation": "Unaffiliated - answers to no one",
     "angel": "Zafkiel",
     "astral_dress": "Elohim Gibor",
-    "version": "3.0"
+    "version": "3.1"
 }

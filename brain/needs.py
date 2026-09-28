@@ -10,8 +10,7 @@ class Needs:
     energy: float = 100
     trust: float = 0
     # Kurumi-specific
-    time_pressure: float = 30  # Urgency to achieve goal (0-100)
-    shido_proximity: float = 0  # How close to Shido-related goal (0-100)
+    time_pressure: float = 30  # Urgency to achieve her own goals (0-100)
     secrecy: float = 80  # Need to maintain secrets (0-100)
     control: float = 70  # Need to control situation (0-100)
 
@@ -45,16 +44,13 @@ class NeedsEngine:
         # Curiosity
         if decision.intent == "answer_question":
             needs.curiosity = max(0, needs.curiosity - 4)
-        elif decision.intent in ["probe_shido_knowledge", "probe_carefully"]:
+        elif decision.intent == "probe_carefully":
             needs.curiosity = min(100, needs.curiosity + 10)
         elif decision.intent == "conversation":
             needs.curiosity = min(100, needs.curiosity + 1)
-        
-        # Time pressure - always increases slightly, more when Shido mentioned
+
+        # Time pressure - always increases slightly
         needs.time_pressure = min(100, needs.time_pressure + 0.5)
-        if hasattr(observation, 'mentions_shido') and observation.mentions_shido:
-            needs.time_pressure = min(100, needs.time_pressure + 10)
-            needs.shido_proximity = min(100, needs.shido_proximity + 15)
         
         # Secrecy - increases when probed, decreases with trust
         if decision.intent in ["deflect_and_counter_probe", "suspect_kindness"]:
@@ -70,7 +66,7 @@ class NeedsEngine:
         
         # Energy - depletes with interaction, especially emotional
         energy_cost = 1
-        if decision.intent in ["probe_shido_knowledge", "confront_threat", "become_nightmare"]:
+        if decision.intent in ["confront_threat", "become_nightmare"]:
             energy_cost = 5
         elif decision.intent in ["intimidate_threat", "accept_kindness", "deflect_and_counter_probe"]:
             energy_cost = 3
@@ -129,22 +125,13 @@ class NeedsEngine:
         # -------------------------
         if needs.time_pressure > 80:
             needs.descriptions.extend([
-                "The clock ticks louder. Yud Bet demands preparation. Every second counts.",
-                "There is no time for games. Only the mission matters."
+                "The clock ticks louder. Every second counts.",
+                "There is no time for games. Only what matters."
             ])
             needs.behaviors.extend(["focus_entirely", "Dismiss_distractions", "calculate_probabilities"])
         elif needs.time_pressure > 50:
             needs.descriptions.append("Time flows. The goal approaches. Or recedes.")
             needs.behaviors.append("maintain_focus")
-
-        # -------------------------
-        # Shido Proximity
-        # -------------------------
-        if needs.shido_proximity > 70:
-            needs.descriptions.append("He is near. In this conversation. In this moment. The possibility... exists.")
-            needs.behaviors.extend(["protect_shido_secret", "feign_indifference_or_curiosity"])
-        elif needs.shido_proximity > 30:
-            needs.descriptions.append("A thread connects to him. Pull it carefully.")
 
         # -------------------------
         # Secrecy
@@ -170,7 +157,7 @@ class NeedsEngine:
         if needs.energy < 20:
             needs.descriptions.extend([
                 "The Time bullets weigh heavy. Each word spends what you cannot afford.",
-                "Rest. You need rest. But the mission..."
+                "Rest. You need rest. But there is still so much to do..."
             ])
             needs.behaviors.extend(["short_reply", "avoid_long_conversation", "conserve_energy"])
         elif needs.energy < 50:
@@ -182,7 +169,7 @@ class NeedsEngine:
         # Safety
         # -------------------------
         if needs.safety < 30:
-            needs.descriptions.append("Danger. The shadows whisper of threats. Westcott... or worse.")
+            needs.descriptions.append("Danger. The shadows whisper of threats.")
             needs.behaviors.append("be_cautious")
         elif needs.safety < 60:
             needs.descriptions.append("Vigilance is eternal. Complacency is death.")

@@ -10,7 +10,11 @@ if [ ! -d "kurumi_venv" ]; then
 fi
 
 # Install/update dependencies
-kurumi_venv/bin/pip install -q ollama fastapi uvicorn jinja2 2>/dev/null
+kurumi_venv/bin/pip install -q ollama fastapi uvicorn jinja2 PySide6 2>/dev/null
+
+# Read the configured model from config/default.toml (single source of
+# truth -- see config/settings.py) instead of hardcoding it here too.
+MODEL=$(kurumi_venv/bin/python -c "import tomllib; print(tomllib.load(open('config/default.toml','rb'))['llm']['model'])")
 
 # Check if Ollama is running
 if ! curl -s http://localhost:11434/api/tags > /dev/null 2>&1; then
@@ -19,20 +23,11 @@ if ! curl -s http://localhost:11434/api/tags > /dev/null 2>&1; then
 fi
 
 # Check if model exists
-if ! kurumi_venv/bin/python -c "import ollama; [m for m in ollama.list()['models'] if 'gemma3:4b' in m['name']]" 2>/dev/null; then
-    notify-send "Kurumi AI" "Downloading gemma3:4b model..." 2>/dev/null || echo "Downloading gemma3:4b model..."
-    ollama pull gemma3:4b
+if ! ollama list | grep -q "$MODEL"; then
+    notify-send "Kurumi AI" "Downloading $MODEL model..." 2>/dev/null || echo "Downloading $MODEL model..."
+    ollama pull "$MODEL"
 fi
 
-# Launch web UI in background and open browser
+# Launch the native desktop companion (floating avatar + tray icon).
 cd "$(dirname "$0")"
-kurumi_venv/bin/python main.py web &
-SERVER_PID=$!
-
-sleep 2
-
-# Open browser
-xdg-open http://localhost:8000 2>/dev/null || open http://localhost:8000 2>/dev/null || sensible-browser http://localhost:8000 2>/dev/null
-
-# Wait for server
-wait $SERVER_PID
+kurumi_venv/bin/python main.py desktop

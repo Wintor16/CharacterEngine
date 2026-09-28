@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 from dataclasses import asdict
 
+from config import settings
 from memory.memory import Memory
 
 
@@ -9,10 +10,10 @@ class MemoryStorage:
 
     def __init__(
         self,
-        file_path="memory/data.json"
+        file_path=None
     ):
 
-        self.file_path = Path(file_path)
+        self.file_path = Path(file_path) if file_path else settings.MEMORY_DIR / "data.json"
 
         self.file_path.parent.mkdir(
             parents=True,

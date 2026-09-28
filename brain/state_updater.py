@@ -10,8 +10,8 @@ class StateUpdater:
         intent_mood_map = {
             "greeting": "pleasant",
             "introduce_self": "confident",
-            "probe_shido_knowledge": "complex",
             "intimidate_threat": "cold",
+            "refuse": "cold",
             "deflect_flattery": "amused",
             "suspect_kindness": "wary",
             "accept_kindness": "touched",
@@ -20,7 +20,6 @@ class StateUpdater:
             "answer_question": "neutral",
             "use_memory": "nostalgic",
             "discuss_time": "determined",
-            "discuss_spirits": "neutral",
             "test_user": "amused",
             "genuine_conversation": "pleasant",
             "confront_threat": "intimidating",
@@ -33,7 +32,7 @@ class StateUpdater:
         # Energy drain
         # -------------------------
         energy_cost = 1
-        if decision.intent in ["probe_shido_knowledge", "confront_threat", "become_nightmare"]:
+        if decision.intent in ["confront_threat", "become_nightmare"]:
             energy_cost = 5
         elif decision.intent in ["intimidate_threat", "accept_kindness", "deflect_and_counter_probe", "accept_challenge"]:
             energy_cost = 3
@@ -62,7 +61,7 @@ class StateUpdater:
         # -------------------------
         # Focus
         # -------------------------
-        if decision.intent in ["probe_shido_knowledge", "confront_threat", "discuss_time"]:
+        if decision.intent in ["confront_threat", "discuss_time"]:
             state.focus = min(100, state.focus + 10)
         elif decision.intent in ["conversation", "greeting"]:
             state.focus = max(0, state.focus - 2)
@@ -73,8 +72,8 @@ class StateUpdater:
         intent_goal_map = {
             "greeting": "Establish presence.",
             "introduce_self": "Present a mask.",
-            "probe_shido_knowledge": "Uncover their connection to Shido.",
             "intimidate_threat": "Demonstrate why I am called Nightmare.",
+            "refuse": "Make clear that orders don't work on her.",
             "deflect_flattery": "Amuse myself at their expense.",
             "suspect_kindness": "Test the steel beneath the silk.",
             "accept_kindness": "Allow a moment of humanity.",
@@ -83,20 +82,19 @@ class StateUpdater:
             "answer_question": "Satisfy curiosity. Reveal nothing vital.",
             "use_memory": "Let the past serve the present.",
             "discuss_time": "Speak of Zafkiel's domain.",
-            "discuss_spirits": "Share the burden of knowledge.",
             "test_user": "Measure their worth.",
             "genuine_conversation": "Enjoy a rare equality.",
-            "confront_threat": "Eliminate the threat. Protect the mission.",
+            "confront_threat": "Eliminate the threat. Protect what's mine.",
             "recall_previous_message": "Demonstrate perfect recall.",
             "conversation": "Observe. Learn. Wait."
         }
         state.current_goal = intent_goal_map.get(decision.intent, "Continue the dance.")
-        
+
         intent_action_map = {
             "greeting": "Exchanging pleasantries with a stranger.",
             "introduce_self": "Weaving a new identity.",
-            "probe_shido_knowledge": "Dissecting their knowledge of Shido Itsuka.",
             "intimidate_threat": "Letting the Nightmare surface.",
+            "refuse": "Declining, plainly. No is a complete sentence.",
             "deflect_flattery": "Smiling at transparent praise.",
             "suspect_kindness": "Searching for the hook in the bait.",
             "accept_kindness": "Accepting a rare moment of warmth.",
@@ -105,7 +103,6 @@ class StateUpdater:
             "answer_question": "Answering on my terms.",
             "use_memory": "Walking through a memory.",
             "discuss_time": "Discussing the nature of Time itself.",
-            "discuss_spirits": "Speaking of my sisters in fate.",
             "test_user": "Probing their character.",
             "genuine_conversation": "Speaking... almost freely.",
             "confront_threat": "Becoming the monster they fear.",
@@ -120,7 +117,7 @@ class StateUpdater:
         if decision.intent in ["intimidate_threat", "confront_threat", "become_nightmare"]:
             state.shadow_activity = "manifested"
             state.zafkiel_eye_state = "glowing"
-        elif decision.intent in ["accept_challenge", "probe_shido_knowledge"]:
+        elif decision.intent == "accept_challenge":
             state.shadow_activity = "active"
             state.zafkiel_eye_state = "visible"
         elif decision.intent in ["genuine_conversation", "accept_kindness"]:
@@ -152,7 +149,6 @@ class StateUpdater:
             "neutral": "The mask holds. Perfect. Porcelain.",
             "pleasant": "A rare ease. The tea is warm. The company... tolerable.",
             "confident": "You know exactly who you are. Nightmare. Spirit of Time.",
-            "complex": "He crosses your mind. The clock eye burns. The mask trembles.",
             "cold": "Temperature drops. The predator wakes.",
             "amused": "Ara ara~ The game amuses you.",
             "wary": "Shadows thicken. Something approaches.",

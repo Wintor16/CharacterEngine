@@ -4,26 +4,29 @@ Kurumi Tokisaki AI - Main Entry Point
 Supports both CLI and Web modes.
 """
 
-import sys
 import argparse
 from character.manager import CharacterManager
+from config import settings
 from core.engine import CharacterEngine
 
 
-def run_cli():
+def run_cli(reset_state: bool = False):
     """Run the CLI chat interface."""
     print("=" * 60)
     print("     KURUMI TOKISAKI AI - Spirit of Time")
     print("=" * 60)
     print()
-    
+
     manager = CharacterManager()
-    character = manager.load("kurumi")
-    
+    character = manager.load(settings.DEFAULT_CHARACTER)
     engine = CharacterEngine(character)
+
+    if reset_state:
+        engine.reset_everything()
+        print("[Reset - starting with a blank slate: no memories, default mood/relationship]\n")
     
     print(f"Loaded: {character.identity['name']} - {character.identity.get('title', '')}")
-    print(f"Model: gemma3:4b")
+    print(f"Model: {settings.MODEL}")
     print()
     print("Type 'exit', 'quit', or 'bye' to end the conversation.")
     print("Type '/stats' to see current state.")
@@ -115,7 +118,6 @@ def print_stats(engine):
         print(f"Social Need:   {needs.social:.0f}/100")
         print(f"Curiosity:     {needs.curiosity:.0f}/100")
         print(f"Time Pressure: {needs.time_pressure:.0f}/100")
-        print(f"Shido Prox:    {needs.shido_proximity:.0f}/100")
         print(f"Secrecy:       {needs.secrecy:.0f}/100")
         print(f"Control:       {needs.control:.0f}/100")
         print()
@@ -147,42 +149,43 @@ def print_memories(engine):
     print()
 
 
-def run_web():
-    """Run the web server."""
-    import uvicorn
-    from ui.app import app
-    
-    print("Starting Kurumi AI Web Server...")
-    print("Access at: http://localhost:8000")
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-
-
 def main():
     parser = argparse.ArgumentParser(description="Kurumi Tokisaki AI Chatbot")
     parser.add_argument(
         "mode",
         nargs="?",
         default="cli",
-        choices=["cli", "web"],
-        help="Run mode: cli (default) or web"
+        choices=["cli", "web", "desktop"],
+        help="Run mode: cli (default), web, or desktop (floating window)"
     )
     parser.add_argument(
         "--port",
         type=int,
-        default=8000,
-        help="Web server port (default: 8000)"
+        default=settings.WEB_PORT,
+        help=f"Web server port (default: {settings.WEB_PORT})"
     )
-    
+    parser.add_argument(
+        "--reset-state",
+        action="store_true",
+        help="Full reset before starting: mood/relationship/needs, long-term memory, and conversation history"
+    )
+
     args = parser.parse_args()
-    
+
     if args.mode == "web":
+        import os
         import uvicorn
+        if args.reset_state:
+            os.environ["KURUMI_RESET_STATE"] = "1"
         from ui.app import app
         print(f"Starting Kurumi AI Web Server on port {args.port}...")
         print(f"Access at: http://localhost:{args.port}")
-        uvicorn.run(app, host="0.0.0.0", port=args.port)
+        uvicorn.run(app, host=settings.WEB_HOST, port=args.port)
+    elif args.mode == "desktop":
+        from desktop.app import main as desktop_main
+        desktop_main(reset_state=args.reset_state)
     else:
-        run_cli()
+        run_cli(reset_state=args.reset_state)
 
 
 if __name__ == "__main__":

@@ -263,6 +263,11 @@
             text-align: center;
         }
 
+        .action-beat {
+            opacity: 0.6;
+            font-style: italic;
+        }
+
         .message-time {
             font-size: 0.65rem;
             color: var(--text-muted);
@@ -612,7 +617,7 @@
             messageDiv.innerHTML = `
                 <div class="avatar ${avatarClass}">${avatarChar}</div>
                 <div class="message-content">
-                    ${moodBadge}${escapeHtml(content).replace(/\n/g, '<br>')}
+                    ${moodBadge}${formatActionBeats(escapeHtml(content)).replace(/\n/g, '<br>')}
                     <div class="message-time">${timeStr}</div>
                 </div>
             `;
@@ -642,6 +647,13 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+
+        function formatActionBeats(escapedText) {
+            // *Action beats* render dimmer + italic so they read as
+            // distinct from spoken dialogue. Runs after escapeHtml, so
+            // the text is already safe - only '*' delimiters are touched.
+            return escapedText.replace(/\*([^*]+)\*/g, '<span class="action-beat">$1</span>');
         }
         
         // Create floating shadow particles

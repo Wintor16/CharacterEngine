@@ -18,7 +18,9 @@ def build_memories(context):
     
     lines.append("")
     lines.append("Only mention a memory if it NATURALLY fits the conversation.")
-    lines.append("Do not force memories. Do not quote word-for-word unless it feels right.")
+    lines.append("Do not force memories in. Treat each one as something that happened, not a")
+    lines.append("line to repeat -- react to it fresh, in your own words, the way remembering")
+    lines.append("something actually feels, never by restating it back the way it's written here.")
     lines.append("Memories are tools. Weapons. Comforts. Use them as Kurumi would.")
     lines.append("NEVER repeat memory metadata, tags, or formatting in your response.")
     

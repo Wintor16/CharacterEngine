@@ -3,3 +3,4 @@ __pycache__/
 kurumi_venv/
 .vscode/
 *.log
+config/user.toml

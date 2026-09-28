@@ -3,11 +3,12 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 from pathlib import Path
-import json
+import os
 import asyncio
-from typing import Dict, List
+from typing import Dict
 
 from character.manager import CharacterManager
+from config import settings
 from core.engine import CharacterEngine
 
 
@@ -15,8 +16,12 @@ from core.engine import CharacterEngine
 async def lifespan(app: FastAPI):
     global engine
     manager = CharacterManager()
-    character = manager.load("kurumi")
+    character = manager.load(settings.DEFAULT_CHARACTER)
     engine = CharacterEngine(character)
+
+    if os.environ.get("KURUMI_RESET_STATE") == "1":
+        engine.reset_everything()
+        print("[Reset - starting with a blank slate: no memories, default mood/relationship]")
     print(f"Kurumi AI initialized: {character.identity['name']}")
     yield
 
@@ -155,11 +160,11 @@ async def status():
     return {
         "status": "online",
         "character": "Kurumi Tokisaki",
-        "model": "gemma3:4b",
+        "model": settings.MODEL,
         "active_connections": len(active_connections)
     }
 
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host=settings.WEB_HOST, port=settings.WEB_PORT)

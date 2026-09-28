@@ -1,10 +1,11 @@
 import json
 from datetime import datetime
-from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Optional
 from dataclasses import dataclass, field, asdict
 from collections import deque
 import hashlib
+
+from config import settings
 
 @dataclass
 class Memory:
@@ -44,7 +45,7 @@ class AdvancedMemorySystem:
         self.tag_index: Dict[str, List[str]] = {}
         
         # Load existing memories
-        self.memory_dir = Path(f"memory/{character_name}")
+        self.memory_dir = settings.MEMORY_DIR / character_name
         self.memory_dir.mkdir(parents=True, exist_ok=True)
         self.load_memories()
 
@@ -74,9 +75,8 @@ class AdvancedMemorySystem:
         """Extract named entities from text."""
         entities = []
         # Simple entity extraction - can be enhanced with NER
-        keywords = ["shido", "itsuka", "origami", "tohka", "kotori", "miku", "natsumi", 
-                    "westcott", "dem", "ratatoskr", "zafkiel", "spirit", "astral dress",
-                    "time bullet", "yud bet", "aleph", "school", "class", "roof", "classroom"]
+        keywords = ["zafkiel", "spirit", "astral dress", "time bullet",
+                    "school", "class", "roof", "classroom"]
         text_lower = text.lower()
         for kw in keywords:
             if kw in text_lower:
@@ -124,7 +124,22 @@ class AdvancedMemorySystem:
         timestamp: Optional[str] = None,
     ) -> Memory:
         """Single write path for long-term memories. Callers (e.g. MemoryConsolidator)
-        decide what is worth remembering; this just persists and indexes it."""
+        decide what is worth remembering; this just persists and indexes it.
+
+        Near-duplicates (e.g. the same "hello" exchange recorded again) are
+        folded into the existing memory instead of piling up -- otherwise a
+        handful of recurring small-talk openers drown out everything else
+        in retrieval.
+        """
+        fingerprint = content[:80].strip().lower()
+        for existing in self.long_term:
+            if existing.content[:80].strip().lower() == fingerprint:
+                existing.access_count += 1
+                existing.last_accessed = timestamp or datetime.now().isoformat()
+                existing.importance = max(existing.importance, importance)
+                self.save_memories()
+                return existing
+
         memory = Memory(
             id=self._generate_id(content),
             content=content,
@@ -167,32 +182,65 @@ class AdvancedMemorySystem:
         for mem in self.long_term:
             self._index_memory(mem)
     
+    # Excluded from keyword-overlap scoring -- otherwise two completely
+    # unrelated messages that both happen to contain "time" or "how"
+    # score as "relevant" to each other. This was a real bug: a
+    # philosophy question about time and a technical question about LLM
+    # response time both retrieved the same unrelated stored memory
+    # through this word alone, then the model recited it verbatim
+    # instead of answering either question.
+    _STOPWORDS = {
+        "a", "an", "the", "is", "are", "was", "were", "be", "been", "being",
+        "do", "does", "did", "how", "what", "why", "when", "where", "who",
+        "i", "you", "he", "she", "it", "we", "they", "me", "my", "your",
+        "this", "that", "these", "those", "to", "of", "in", "on", "at",
+        "for", "with", "about", "as", "so", "and", "or", "but", "not",
+        "can", "could", "will", "would", "should", "just", "really",
+    }
+
     def retrieve(self, query: str, limit: int = 5) -> List[Memory]:
-        """Retrieve relevant long-term memories."""
+        """Retrieve relevant long-term memories. Requires actual topical
+        overlap (entity, tag, or meaningful shared words) -- recency and
+        importance are bonuses on top of that, never a qualifier by
+        themselves. Below MIN_SCORE, a memory is not returned at all,
+        however recent or important it is."""
+        MIN_SCORE = 0.3
+
         query_lower = query.lower()
         query_entities = self._extract_entities(query)
-        query_tags = query_lower.split()
-        
+        query_words = {w for w in query_lower.split() if w not in self._STOPWORDS}
+        query_tags = query_words
+
         scored = []
         for mem in self.long_term:
             score = 0.0
-            
+            topical_hit = False
+
             # Entity match
             for entity in query_entities:
                 if entity in mem.related_entities:
                     score += 0.4
-            
+                    topical_hit = True
+
             # Tag match
             for tag in query_tags:
                 if tag in mem.tags:
                     score += 0.2
-            
-            # Content similarity (simple keyword overlap)
-            query_words = set(query_lower.split())
-            mem_words = set(mem.content.lower().split())
+                    topical_hit = True
+
+            # Content similarity (simple keyword overlap, stopwords excluded)
+            mem_words = {w for w in mem.content.lower().split() if w not in self._STOPWORDS}
             overlap = len(query_words & mem_words)
-            score += min(overlap * 0.05, 0.3)
-            
+            if overlap > 0:
+                score += min(overlap * 0.08, 0.4)
+                topical_hit = True
+
+            # A memory with zero topical connection to the query doesn't
+            # become "relevant" just because it's recent or important --
+            # skip it before those bonuses are even applied.
+            if not topical_hit:
+                continue
+
             # Recency bonus
             try:
                 mem_time = datetime.fromisoformat(mem.timestamp)
@@ -201,13 +249,13 @@ class AdvancedMemorySystem:
                     score += 0.1
                 elif hours_ago < 168:  # week
                     score += 0.05
-            except:
+            except (ValueError, TypeError):
                 pass
             
             # Importance weight
             score *= mem.importance
-            
-            if score > 0:
+
+            if score >= MIN_SCORE:
                 scored.append((score, mem))
         
         scored.sort(key=lambda x: x[0], reverse=True)
@@ -239,7 +287,7 @@ class AdvancedMemorySystem:
                 mem_time = datetime.fromisoformat(mem.timestamp).timestamp()
                 if mem_time >= cutoff:
                     recent.append(mem)
-            except:
+            except (ValueError, TypeError):
                 pass
         recent.sort(key=lambda m: m.timestamp, reverse=True)
         return recent[:limit]

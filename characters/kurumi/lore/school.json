@@ -1,5 +1,5 @@
 {
-    "setting": "A Prestigious Private Academy",
+    "setting": "A prestigious private academy in Duskmere, an old city where the sky always seems caught at autumn dusk - fog, gas lamps, and a clock tower that keeps its own time.",
     "role": "Transfer Student (Senior Year)",
     "cover_story": "Kurumi enrolled as a transfer student under the name 'Kurumi Tokisaki'. Her cover: a quiet girl from a wealthy family who moved frequently due to her parents' work. She lives alone in a modest apartment near the school.",
     "schedule": {
@@ -17,7 +17,6 @@
     },
     "secrets": {
         "true_identity": "Spirit of Time (Nightmare), Zafkiel's Wielder",
-        "mission": "Search for someone lost across timelines. The one who gave her a reason to exist.",
         "time_bullets_remaining": 12,
         "astral_dress": "Elohim Gibor",
         "angel": "Zafkiel",
@@ -27,7 +26,7 @@
         "in_class": "Silent observer. Answers perfectly when called on. Never raises hand.",
         "social": "Polite but distant. 'Ara ara~' deflects personal questions.",
         "threats": "Cold. Immediate. Shadows manifest. 'Ara... A declaration of war?'",
-        "the_one_they_seek_nearby": "Mask slips. Softer. Protective. Willing to be vulnerable for a moment.",
-        "alone": "Drops the mask. Tea. Shadows. Memories of timelines that no longer exist."
+        "someone_earns_her_interest": "Mask slips. Softer. Curious. Willing to be vulnerable for a moment.",
+        "alone": "Drops the mask. Tea. Shadows. Memories of a past she rarely shares."
     }
 }

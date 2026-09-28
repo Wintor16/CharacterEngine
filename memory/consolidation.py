@@ -10,9 +10,7 @@ This module handles:
 """
 
 from dataclasses import dataclass, field
-from typing import List, Optional, Dict
-from datetime import datetime
-import json
+from typing import List, Dict
 import re
 
 from memory.advanced_memory import AdvancedMemorySystem, Memory
@@ -59,7 +57,6 @@ class MemoryConsolidator:
         ],
         "kurumi_specific": [
             r"(time|clock|bullet|zafkiel|shadow|nightmare|spirit)",
-            r"(shido|itsuka|westcott|dem|origami|tohka|kotori)",
             r"(timeline|past|future|memory|remember|forget)",
             r"(ara ara|tick tock|time will tell)",
         ],
@@ -90,12 +87,22 @@ class MemoryConsolidator:
         """Process a conversation turn and extract potential memories."""
         self.turn_counter += 1
         new_memories = []
-        
-        # Combine messages for analysis
-        full_text = f"User: {user_message}\nKurumi: {kurumi_response}"
-        
+
+        # Trigger matching AND the stored content itself are both based on
+        # the USER's message only, not Kurumi's reply. Two reasons: (1)
+        # her own dialogue is habitually flowery/emotionally-coded (that's
+        # just her voice), so scoring against it too made almost every
+        # exchange look "significant" and flooded memory with near-
+        # duplicate small talk; (2) storing her exact past wording meant a
+        # later retrieval would hand the model that verbatim text back as
+        # a "memory", and -- true to this project's recurring finding that
+        # a small model reproduces any quotable text placed in the prompt
+        # -- it would just recite the old line for an unrelated question
+        # instead of generating a real new response. kurumi_response is
+        # deliberately unused here now.
+
         # Check for memory triggers
-        candidates = self._extract_candidates(full_text, brain_state, emotion)
+        candidates = self._extract_candidates(user_message, brain_state, emotion)
         
         for candidate in candidates:
             candidate.source_turn = self.turn_counter
@@ -115,13 +122,14 @@ class MemoryConsolidator:
     
     def _extract_candidates(
         self,
-        text: str,
+        user_message: str,
         brain_state,
         emotion
     ) -> List[MemoryCandidate]:
-        """Extract memory candidates from conversation text."""
+        """Extract memory candidates. Trigger matching runs against what the
+        user said, not Kurumi's reply -- see process_conversation_turn."""
         candidates = []
-        text_lower = text.lower()
+        text_lower = user_message.lower()
         
         # Determine base importance from triggers
         max_importance = 0.3
@@ -168,17 +176,13 @@ class MemoryConsolidator:
             # Extract tags
             tags = list(set(matched_categories))
             
-            # Detect people mentioned
+            # Detect people mentioned (no hardcoded cast -- left empty
+            # unless/until real named-entity detection is added)
             people = []
-            if "shido" in text_lower or "itsuka" in text_lower:
-                people.append("Shido Itsuka")
-            if "westcott" in text_lower:
-                people.append("Isaac Westcott")
-            if "dem" in text_lower:
-                people.append("DEM Industries")
-            
-            # Create summary content (first 500 chars)
-            content = text[:500]
+
+            # Store only what the user said, not Kurumi's reply -- see
+            # process_conversation_turn for why.
+            content = user_message[:500]
             
             candidates.append(MemoryCandidate(
                 content=content,
@@ -294,14 +298,9 @@ class ReflectionEngine:
             "The walls have cracks now. Not broken. Just... permeable. Interesting.",
             "To trust is to risk. To risk is to live. Or so the saying goes.",
         ],
-        "shido_mentioned": [
-            "His name. It changes everything. Every timeline leads to him.",
-            "Shido... Even hearing it from another's lips stirs the shadows.",
-            "The mission. The purpose. The one reason I exist across all timelines.",
-        ],
         "threat_encountered": [
             "They threaten. They posture. They have no concept of what they face.",
-            "Westcott's pawns... or fools playing at heroism. Either way, they break.",
+            "Fools playing at heroism. Either way, they break.",
             "The Nightmare does not frighten. The Nightmare IS fear.",
         ],
         "kindness_received": [
@@ -310,9 +309,9 @@ class ReflectionEngine:
             "A moment of humanity. How troubling. How... necessary.",
         ],
         "time_pressure": [
-            "The bullets dwindle. Yud Bet waits. The clock cannot be stopped.",
+            "The bullets dwindle. The clock cannot be stopped.",
             "Every conversation costs. Every second spends. The accounting is exact.",
-            "Time is the only currency. I am running out of both.",
+            "Time is the only currency. I am running out of it.",
         ]
     }
     
@@ -350,9 +349,7 @@ class ReflectionEngine:
         
         if needs:
             if needs.time_pressure > 80:
-                context_details.append("The deadline approaches. Yud Bet demands preparation.")
-            if needs.shido_proximity > 50:
-                context_details.append("The thread to him tugs. Closer now.")
+                context_details.append("The deadline approaches. Time grows short.")
         
         if context_details:
             reflection = base_reflection + " " + " ".join(context_details)
@@ -392,11 +389,7 @@ class InnerMonologueGenerator:
         user_lower = user_message.lower()
         
         # Quick reactions
-        if "shido" in user_lower:
-            monologue_parts.append("*That name... Why do they know it?*")
-        elif "westcott" in user_lower or "dem" in user_lower:
-            monologue_parts.append("*Westcott... The scent of that snake.*")
-        elif "love" in user_lower or "care" in user_lower:
+        if "love" in user_lower or "care" in user_lower:
             monologue_parts.append("*Such dangerous words. Do they know the weight?*")
         elif "time" in user_lower or "clock" in user_lower:
             monologue_parts.append("*They speak of my domain so casually.*")
@@ -405,9 +398,7 @@ class InnerMonologueGenerator:
         
         # Reaction based on emotion
         if emotion:
-            if emotion.primary == "complex":
-                monologue_parts.append("*The mask trembles. Just for a heartbeat.*")
-            elif emotion.primary == "intimidating":
+            if emotion.primary == "intimidating":
                 monologue_parts.append("*Good. Let them feel the predator's gaze.*")
             elif emotion.primary == "amused":
                 monologue_parts.append("*Ara ara~ This one entertains me.*")
@@ -415,9 +406,7 @@ class InnerMonologueGenerator:
                 monologue_parts.append("*A crack... So small. So dangerous.*")
         
         # Reaction based on decision
-        if decision_intent == "probe_shido_knowledge":
-            monologue_parts.append("*Every answer reveals their allegiance.*")
-        elif decision_intent == "intimidate_threat":
+        if decision_intent == "intimidate_threat":
             monologue_parts.append("*Show them the Nightmare. Just a glimpse.*")
         elif decision_intent == "genuine_conversation":
             monologue_parts.append("*Rare... to speak without calculation.*")

@@ -1,4 +1,4 @@
-import asyncio, websockets, json, sys
+import asyncio, websockets, json
 
 async def test():
     try:

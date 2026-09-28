@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional
-from datetime import datetime
+from typing import List, Dict
 
 
 @dataclass
@@ -12,7 +11,6 @@ class SchoolAnalysis:
     
     # Character interactions (generic)
     mentioned_characters: List[str] = field(default_factory=list)
-    the_one_they_seek_mentioned: bool = False  # The person Kurumi seeks across timelines
     authority_figure_mentioned: bool = False   # Teacher, student council president, etc.
     rival_mentioned: bool = False              # Someone who suspects or opposes Kurumi
     friend_mentioned: bool = False             # A potential friend/ally
@@ -27,7 +25,7 @@ class SchoolAnalysis:
     is_casual: bool = True
     
     # Kurumi's perspective
-    kurumi_should_respond_as: str = "student"  # student, spirit, protector, predator, self
+    kurumi_should_respond_as: str = "student"  # student, spirit, predator, self
     emotional_tone: str = "neutral"  # neutral, curious, protective, predatory, bored, annoyed
     urgency: float = 0.0  # 0.0 to 1.0
     
@@ -62,19 +60,18 @@ class SchoolContextEngine:
         "night": ["night", "evening", "dark", "moon", "stars", "empty", "patrol", "shadow", "midnight", "late"],
     }
     
-    # Generic character role keywords (not specific Date A Live characters)
+    # Generic character role keywords (no named characters, just roles)
     CHARACTER_ROLE_KEYWORDS = {
-        "the_one_they_seek": ["the one i seek", "the one i'm looking for", "him", "her", "that person", "the one"],
         "authority_figure": ["teacher", "professor", "principal", "student council", "president", "council president", "authority", "faculty"],
         "rival": ["rival", "suspect", "suspicious", "watching me", "watches me", "knows too much", "investigate"],
         "friend": ["friend", "friendship", "close", "trust", "confide", "ally"],
     }
-    
+
     TOPIC_KEYWORDS = {
         "homework": ["homework", "assignment", "project", "due", "deadline", "study"],
         "clubs": ["club", "clubroom", "astronomy", "club activity", "join club"],
-        "spirits": ["spirit", "sephira", "astral dress", "angel", "inverse", "spacequake", "manifest"],
-        "time": ["time", "clock", "bullet", "zafkiel", "aleph", "yud bet", "timeline", "past", "future", "rewind", "stop time"],
+        "spirits": ["spirit", "astral dress", "angel", "inverse", "spacequake", "manifest"],
+        "time": ["time", "clock", "bullet", "zafkiel", "timeline", "past", "future", "rewind", "stop time"],
         "supernatural": ["supernatural", "magic", "power", "ability", "power", "phenomenon"],
         "school_life": ["school", "class", "teacher", "student", "grade", "exam", "uniform", "club"],
         "relationships": ["friend", "date", "love", "crush", "confess", "boyfriend", "girlfriend", "like"],
@@ -101,7 +98,6 @@ class SchoolContextEngine:
         
         # --- Character Role Mentions ---
         analysis.mentioned_characters = self._detect_character_roles(text)
-        analysis.the_one_they_seek_mentioned = "the_one_they_seek" in analysis.mentioned_characters
         analysis.authority_figure_mentioned = "authority_figure" in analysis.mentioned_characters
         analysis.rival_mentioned = "rival" in analysis.mentioned_characters
         analysis.friend_mentioned = "friend" in analysis.mentioned_characters
@@ -182,12 +178,6 @@ class SchoolContextEngine:
             tone = "guarded"
             urgency = 0.7
         
-        # The one they seek mentioned -> Protector perspective
-        if analysis.the_one_they_seek_mentioned:
-            perspective = "protector"
-            tone = "protective"
-            urgency = 0.8
-        
         # Threat -> Predator
         if analysis.is_threat:
             perspective = "predator"
@@ -229,10 +219,7 @@ class SchoolContextEngine:
     
     def _generate_insights(self, analysis: 'SchoolAnalysis') -> List[str]:
         insights = []
-        
-        if analysis.the_one_they_seek_mentioned:
-            insights.append("They speak of the one I seek across timelines. My reason for being here. I must listen carefully.")
-        
+
         if analysis.rival_mentioned or analysis.authority_figure_mentioned:
             insights.append("Someone who suspects... or watches too closely. I must be careful.")
         
@@ -264,10 +251,7 @@ class SchoolContextEngine:
     
     def _suggest_actions(self, analysis: 'SchoolAnalysis') -> List[str]:
         actions = []
-        
-        if analysis.the_one_they_seek_mentioned:
-            actions.append("Listen for details about the one I seek. Protect them.")
-        
+
         if analysis.rival_mentioned or analysis.authority_figure_mentioned:
             actions.append("Deflect. Misdirect. Do not let them confirm suspicions.")
         
@@ -296,7 +280,6 @@ class SchoolContextEngine:
     
     def _get_relationship_context(self) -> Dict[str, float]:
         return {
-            "the_one_they_seek": 95.0,      # The mission
             "authority_figure": -30.0,      # Suspicion
             "rival": -20.0,                 # Suspicion
             "friend": 20.0,                 # Potential ally

@@ -1,3 +1,4 @@
+from config import settings
 from memory.storage import MemoryStorage
 from memory.memory import Memory
 from memory.retriever import MemoryRetriever
@@ -8,15 +9,21 @@ class MemoryManager:
 
     def __init__(
         self,
-        short_memory_limit: int = 8
+        short_memory_limit: int = 8,
+        character_name: str = None
     ):
 
         self.storage = MemoryStorage()
 
         self.retriever = MemoryRetriever()
 
+        log_path = None
+        if character_name:
+            log_path = settings.MEMORY_DIR / character_name / "conversation_log.jsonl"
+
         self.short_memory = ShortMemory(
-            limit=short_memory_limit
+            limit=short_memory_limit,
+            log_path=log_path
         )
 
         self.memories = self.storage.load()

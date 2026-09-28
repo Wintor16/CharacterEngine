@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List, Optional
 
 from brain.context import BrainContext
 from brain.decision import DecisionMaker
@@ -14,6 +13,8 @@ from brain.school_context import SchoolContextEngine
 from brain.state import BrainState
 from brain.state_updater import StateUpdater
 from brain.thought import ThoughtGenerator
+from brain.persistence import load_state, save_state, reset_state
+from config import settings
 from memory.advanced_memory import AdvancedMemorySystem
 
 
@@ -34,12 +35,12 @@ class Brain:
         # Advanced memory system
         self.advanced_memory = AdvancedMemorySystem(
             character_name=character.name,
-            max_short_term=20,
-            max_long_term=1000
+            max_short_term=settings.SHORT_TERM_LIMIT,
+            max_long_term=settings.LONG_TERM_LIMIT
         )
         
-        self.state = BrainState()
-        
+        self.state = load_state(character.name) or BrainState()
+
         # Brain Systems
         self.perception = Perception()
         self.observer = Observer()
@@ -59,9 +60,8 @@ class Brain:
     def _load_school_lore(self):
         """Load school lore into character for brain access."""
         import json
-        from pathlib import Path
-        
-        lore_path = Path("characters/kurumi/lore/school.json")
+
+        lore_path = settings.CHARACTERS_DIR / settings.DEFAULT_CHARACTER / "lore/school.json"
         if lore_path.exists():
             with open(lore_path, 'r', encoding='utf-8') as f:
                 self.school_lore = json.load(f)
@@ -105,21 +105,16 @@ class Brain:
         # ---------------------------------
         # Memory Retrieval (Advanced)
         # ---------------------------------
-        relevant_memories = self.advanced_memory.retrieve(user_message, limit=5)
-        
-        # Also get recent memories for context
-        recent_memories = self.advanced_memory.get_recent_memories(hours=24, limit=10)
-        
-        # Combine memories for decision making
-        all_memories = relevant_memories + recent_memories
-        # Deduplicate
-        seen_ids = set()
-        unique_memories = []
-        for m in all_memories:
-            if m.id not in seen_ids:
-                seen_ids.add(m.id)
-                unique_memories.append(m)
-        
+        # Deliberately NOT merging in get_recent_memories() here anymore --
+        # it has no relevance filter at all (purely "was this created in
+        # the last 24h"), so it used to make almost every offbeat message
+        # trigger the "use_memory" decision below regardless of topic.
+        # Concretely: a philosophy question and an unrelated technical
+        # question both ended up reciting the same stored memory back
+        # verbatim, just because it was recent. retrieve() itself already
+        # requires real topical overlap (see MIN_SCORE there).
+        unique_memories = self.advanced_memory.retrieve(user_message, limit=5)
+
         # Convert to legacy format for backward compatibility
         legacy_memories = []
         for m in unique_memories:
@@ -238,9 +233,27 @@ class Brain:
         # This will be done after LLM generates response
         # We store it here for next turn
         context.user_message = user_message
-        
+
+        # Persist state after every turn so mood/relationship/needs survive
+        # a restart instead of resetting to defaults.
+        save_state(self.character.name, self.state)
+
         return BrainResult(context=context)
-    
+
     def store_response(self, response_text: str):
         """Store assistant response in advanced memory."""
         self.advanced_memory.add_short_term("assistant", response_text)
+
+    def reset(self):
+        """Full reset: state back to defaults, long-term memory wiped,
+        the persisted state file removed. Used by the reset control, not
+        casual conversation resets (see MemoryManager.clear_conversation
+        for that)."""
+        reset_state(self.character.name)
+        self.state = BrainState()
+
+        self.advanced_memory.long_term = []
+        self.advanced_memory.entity_index = {}
+        self.advanced_memory.tag_index = {}
+        self.advanced_memory.short_term.clear()
+        self.advanced_memory.save_memories()

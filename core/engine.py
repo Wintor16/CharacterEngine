@@ -1,7 +1,9 @@
 import time
+from datetime import datetime
 from typing import Optional
 
 from brain.brain import Brain
+from config import settings
 from core.llm import LLM
 from core.prompt.builder import PromptBuilder
 from memory.manager import MemoryManager
@@ -12,12 +14,13 @@ class CharacterEngine:
     def __init__(
         self,
         character,
-        model: str = "gemma3:4b"
+        model: str = settings.MODEL
     ):
         self.character = character
 
         self.memory = MemoryManager(
-            short_memory_limit=8
+            short_memory_limit=settings.HISTORY_LIMIT,
+            character_name=character.name
         )
 
         self.brain = Brain(
@@ -26,11 +29,11 @@ class CharacterEngine:
         )
 
         self.prompt_builder = PromptBuilder(
-            history_limit=8
+            history_limit=settings.HISTORY_LIMIT
         )
 
         self.llm = LLM(model=model)
-        
+
         # Memory consolidation and reflection systems
         self.consolidator = MemoryConsolidator(self.brain.advanced_memory)
         self.reflection_engine = ReflectionEngine()
@@ -39,13 +42,27 @@ class CharacterEngine:
         # Conversation tracking
         self.conversation_turn = 0
         self.session_start_time = time.time()
+        # Only ever set from a real user message (see reply() below) --
+        # a proactive message from her own side must never reset this,
+        # or the idle-time gate in brain/proactive.py would never fire.
+        self.last_interaction_at: Optional[datetime] = None
+        # Structured, non-chain-of-thought metadata from the last turn --
+        # see spec §11/§21: debug info is fine, hidden reasoning is not.
+        self.last_debug: dict = {}
 
     def reply(
         self,
         user_message: str,
+        is_proactive: bool = False,
         **llm_kwargs
     ):
         total_start = time.perf_counter()
+        # A proactive utterance (she speaks up on her own -- see
+        # brain/proactive.py) must NOT count as "the user interacted,"
+        # or it would reset her own idle clock and the idle-time gate
+        # that triggered it would never fire again afterward.
+        if not is_proactive:
+            self.last_interaction_at = datetime.now()
 
         # ---------------------------------
         # Brain Processing
@@ -147,7 +164,42 @@ class CharacterEngine:
             f"\n  Turn       : #{self.conversation_turn}"
         )
 
+        # ---------------------------------
+        # Debug metadata (structured, not chain-of-thought -- spec §11/§21)
+        # ---------------------------------
+        ctx = brain_result.context
+        self.last_debug = {
+            "model": self.llm.model,
+            "success": response.success,
+            "timing": {
+                "brain": round(brain_time, 3),
+                "prompt": round(prompt_time, 3),
+                "llm": round(llm_time, 3),
+                "total": round(total_time, 3),
+            },
+            "prompt_chars": sum(len(m.get("content", "")) for m in messages),
+            "decision_intent": ctx.decision.intent if ctx and ctx.decision else "",
+            "decision_reason": ctx.decision.reason if ctx and ctx.decision else "",
+            "emotion": ctx.emotion.primary if ctx and ctx.emotion else "",
+            "emotion_intensity": round(ctx.emotion.intensity, 2) if ctx and ctx.emotion else 0.0,
+            "reasoning_objective": ctx.reasoning.objective if ctx and ctx.reasoning else "",
+            "plan_tone": ctx.plan.tone if ctx and ctx.plan else "",
+            "plan_length": ctx.plan.response_length if ctx and ctx.plan else "",
+            "memories_used": len(ctx.memories) if ctx and ctx.memories else 0,
+        }
+
         return response
+
+    def reset_everything(self):
+        """Full reset: mood/relationship/needs, long-term memory, and the
+        persisted conversation log are all wiped. Irreversible -- callers
+        (the desktop tray button, CLI --reset-state) are expected to
+        confirm with the user first."""
+        self.brain.reset()
+        self.memory.short_memory.clear()
+        self.conversation_turn = 0
+        self.session_start_time = time.time()
+        self.last_interaction_at = None
 
     def end_conversation(self) -> str:
         """Call when conversation ends to generate final reflection."""

@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Dict
+from typing import List
 
 from brain.decision import Decision
 from brain.state import BrainState
@@ -49,7 +49,7 @@ class EmotionEngine:
         "wary": {
             "descriptions": [
                 "The shadows around you thicken. Something is wrong.",
-                "Westcott's scent... or something like it. Your finger rests on the trigger."
+                "A familiar scent of danger. Your finger rests on the trigger."
             ],
             "behaviors": ["be_cautious", "prepare_shadows", "limit_information"],
             "mask_level": 0.8
@@ -61,15 +61,6 @@ class EmotionEngine:
             ],
             "behaviors": ["speak_flatly", "short_replies", "intimidate"],
             "mask_level": 0.5
-        },
-        "complex": {  # Shido-related
-            "descriptions": [
-                "A thousand emotions war behind your eyes. Longing. Regret. Determination. Love.",
-                "That name... It undoes centuries of careful walls. Just for a moment."
-            ],
-            "behaviors": ["pause", "choose_words_carefully", "show_rare_vulnerability"],
-            "mask_level": 0.4,
-            "true_feeling": "A desperate, ancient love that has burned through countless timelines"
         },
         "touched": {  # Genuine kindness
             "descriptions": [
@@ -106,8 +97,8 @@ class EmotionEngine:
         },
         "determined": {
             "descriptions": [
-                "Every fiber aligns toward a single point. The 12th Bullet. Yud Bet.",
-                "No cost is too great. No sacrifice too large. For him."
+                "Every fiber aligns toward a single point. Nothing else matters right now.",
+                "No cost is too great. No sacrifice too large. Not for this."
             ],
             "behaviors": ["focus_entirely", "Dismiss_distractions", "calculate_probabilities"],
             "mask_level": 0.8
@@ -126,8 +117,8 @@ class EmotionEngine:
         intent_emotion_map = {
             "greeting": "amused",
             "introduce_self": "neutral",
-            "probe_shido_knowledge": "complex",
             "intimidate_threat": "intimidating",
+            "refuse": "cold",
             "deflect_flattery": "amused",
             "suspect_kindness": "wary",
             "accept_kindness": "touched",
@@ -136,7 +127,6 @@ class EmotionEngine:
             "answer_question": "curious",
             "use_memory": "nostalgic",
             "discuss_time": "determined",
-            "discuss_spirits": "neutral",
             "test_user": "amused",
             "genuine_conversation": "curious",
             "confront_threat": "intimidating",
@@ -146,15 +136,12 @@ class EmotionEngine:
         emotion.primary = intent_emotion_map.get(decision.intent, "neutral")
         
         # Layer secondary emotion based on observation
-        if observation.emotional_resonance == "touched" and emotion.primary != "complex":
+        if observation.emotional_resonance == "touched":
             emotion.secondary = "touched"
             emotion.secondary_intensity = 0.3
         elif observation.emotional_resonance == "wary":
             emotion.secondary = "wary"
             emotion.secondary_intensity = 0.4
-        elif observation.emotional_resonance == "complex":
-            emotion.secondary = "complex"
-            emotion.secondary_intensity = 0.5
         elif observation.threat_level == "high":
             emotion.secondary = "intimidating"
             emotion.secondary_intensity = 0.6

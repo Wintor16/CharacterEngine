@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List
 
 from brain.behavior import BehaviorInterpreter
 from brain.reasoning import Reasoning
@@ -101,11 +101,6 @@ class Planner:
         # ---------------------------------
         # Special situational overrides
         # ---------------------------------
-        if "protect_shido_secret" in reasoning.instructions:
-            plan.mask_level = "full"
-            plan.directness = "cryptic"
-            plan.reveal_information = "little"
-        
         if "feed_misinformation" in reasoning.instructions:
             plan.directness = "deceptive"
         
@@ -119,11 +114,6 @@ class Planner:
             plan.directness = "direct"
             plan.hebrew_bullet_ref = True
             plan.shadow_imagery = True
-        
-        if "probe_shido_connection" == reasoning.objective:
-            plan.mask_level = "partial"
-            plan.directness = "indirect"
-            plan.clock_references = True
         
         # ---------------------------------
         # Cleanup
@@ -153,12 +143,20 @@ class Planner:
         return "normal"
     
     def _determine_directness(self, reasoning: Reasoning) -> str:
+        # Specific, earned overrides checked FIRST -- "never_fully_explain"
+        # is appended to instructions unconditionally on every turn (see
+        # reasoning.py), so checking it before these meant they were
+        # unreachable: she could never actually be direct, even during a
+        # genuine moment or a real refusal at high trust. Mystery should
+        # be the default, not the only possible mode.
+        if "decline_firmly" == reasoning.conclusion:
+            return "direct"
+        if "be_real" == reasoning.conclusion or "genuine_partnership" == reasoning.objective:
+            return "direct"
         if "never_fully_explain" in reasoning.instructions:
             return "indirect"
         if "choose_mask_carefully" in reasoning.instructions:
             return "cryptic"
-        if "be_real" == reasoning.conclusion or "genuine_partnership" == reasoning.objective:
-            return "direct"
         return "indirect"
     
     def _determine_honesty(self, reasoning: Reasoning) -> str:

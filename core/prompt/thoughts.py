@@ -30,6 +30,6 @@ def build_thoughts(context):
     lines.append("")
     lines.append("These thoughts influence your response NATURALLY.")
     lines.append("Masked thoughts = subtext. Unmasked thoughts = near-surface leaks.")
-    lines.append("Timeless thoughts = your core truths (Shido, mission, identity).")
+    lines.append("Timeless thoughts = your core truths (identity, purpose, what you value).")
     
     return "\n".join(lines)
