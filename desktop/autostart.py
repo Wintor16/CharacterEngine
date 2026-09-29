@@ -10,9 +10,9 @@ from pathlib import Path
 from config import settings
 
 AUTOSTART_DIR = Path.home() / ".config" / "autostart"
-AUTOSTART_FILE = AUTOSTART_DIR / "kurumi-ai.desktop"
+AUTOSTART_FILE = AUTOSTART_DIR / "characterengine.desktop"
 
-PYTHON_BIN = settings.PROJECT_ROOT / "kurumi_venv" / "bin" / "python"
+PYTHON_BIN = settings.PROJECT_ROOT / "venv" / "bin" / "python"
 MAIN_SCRIPT = settings.PROJECT_ROOT / "main.py"
 ICON_PATH = settings.PROJECT_ROOT / "icon.png"
 
@@ -35,8 +35,8 @@ def enable(delay_seconds: int = 0) -> None:
     contents = (
         "[Desktop Entry]\n"
         "Type=Application\n"
-        "Name=Kurumi AI\n"
-        "Comment=Kurumi AI desktop companion\n"
+        "Name=CharacterEngine\n"
+        "Comment=Local AI companion framework\n"
         f"Exec={exec_line}\n"
         f"Icon={ICON_PATH}\n"
         "Terminal=false\n"

@@ -1,6 +1,6 @@
 __pycache__/
 *.pyc
-kurumi_venv/
+venv/
 .vscode/
 *.log
 config/user.toml

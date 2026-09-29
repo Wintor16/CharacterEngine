@@ -13,7 +13,7 @@ from core.engine import CharacterEngine
 def run_cli(reset_state: bool = False):
     """Run the CLI chat interface."""
     print("=" * 60)
-    print("     KURUMI TOKISAKI AI - Spirit of Time")
+    print("     CharacterEngine")
     print("=" * 60)
     print()
 
@@ -178,7 +178,7 @@ def main():
         if args.reset_state:
             os.environ["KURUMI_RESET_STATE"] = "1"
         from ui.app import app
-        print(f"Starting Kurumi AI Web Server on port {args.port}...")
+        print(f"Starting CharacterEngine Web Server on port {args.port}...")
         print(f"Access at: http://localhost:{args.port}")
         uvicorn.run(app, host=settings.WEB_HOST, port=args.port)
     elif args.mode == "desktop":

@@ -22,7 +22,7 @@ async def lifespan(app: FastAPI):
     if os.environ.get("KURUMI_RESET_STATE") == "1":
         engine.reset_everything()
         print("[Reset - starting with a blank slate: no memories, default mood/relationship]")
-    print(f"Kurumi AI initialized: {character.identity['name']}")
+    print(f"CharacterEngine initialized: {character.identity['name']}")
     yield
 
 

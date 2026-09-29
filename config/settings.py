@@ -1,4 +1,4 @@
-"""Central configuration for Kurumi AI.
+"""Central configuration for CharacterEngine.
 
 Resolves PROJECT_ROOT once from this file's own location, so every path
 in the app is anchored regardless of the process's working directory --

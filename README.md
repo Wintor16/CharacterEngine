@@ -1,4 +1,4 @@
-# Kurumi AI
+# CharacterEngine
 
 A local-first AI companion framework. A character lives on your machine as a persistent desktop presence, runs on a local model through [Ollama](https://ollama.com), and keeps its own state: relationship, mood, and memory all persist across restarts instead of resetting per session. The included reference character is Kurumi Tokisaki (Date A Live), defined entirely by one JSON config file.
 
@@ -27,8 +27,8 @@ Relationship state (trust, affection, familiarity, respect, comfort) and mood pe
 ## Setup
 
 ```bash
-python3 -m venv kurumi_venv
-source kurumi_venv/bin/activate
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
 
 ollama pull gemma3:4b

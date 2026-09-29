@@ -125,7 +125,7 @@ def main(reset_state: bool = False, character_name_override: str = None):
 
     icon = QIcon(str(ICON_PATH)) if ICON_PATH.exists() else app.windowIcon()
     tray = QSystemTrayIcon(icon, app)
-    tray.setToolTip(f"{display_name} - Kurumi AI")
+    tray.setToolTip(f"{display_name} - CharacterEngine")
 
     menu = QMenu()
     show_action = menu.addAction("Show Kurumi")
@@ -179,7 +179,7 @@ def main(reset_state: bool = False, character_name_override: str = None):
     def do_reset():
         answer = QMessageBox.question(
             None,
-            "Reset Kurumi",
+            f"Reset {display_name}",
             "This permanently erases her memories, relationship, mood, "
             "and conversation history, and starts completely fresh. "
             "This cannot be undone.\n\nContinue?",
@@ -196,7 +196,7 @@ def main(reset_state: bool = False, character_name_override: str = None):
             window.chat_panel.stats_panel.refresh(engine.brain.state)
         window.chat_panel.greet("*The clock resets. A blank page.* ...Who are you again?")
 
-    reset_action = menu.addAction("Reset Kurumi (forget everything)")
+    reset_action = menu.addAction(f"Reset {display_name} (forget everything)")
     reset_action.triggered.connect(do_reset)
 
     menu.addSeparator()
@@ -211,7 +211,7 @@ def main(reset_state: bool = False, character_name_override: str = None):
         tray.hide()
         os.execv(sys.orig_argv[0], sys.orig_argv)
 
-    restart_action = menu.addAction("Restart Kurumi AI")
+    restart_action = menu.addAction("Restart CharacterEngine")
     restart_action.setToolTip("Relaunches the app. Memory and relationship are untouched.")
     restart_action.triggered.connect(restart_app)
 

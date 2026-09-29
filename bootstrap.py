@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Kurumi AI - One-File Launcher
+CharacterEngine - One-File Launcher
 Does everything: setup venv, install deps, start Ollama, pull model, run CLI or Web UI
 """
 
@@ -13,7 +13,7 @@ from pathlib import Path
 
 # ─── CONFIG ───
 PROJECT_DIR = Path(__file__).parent.absolute()
-VENV_DIR = PROJECT_DIR / "kurumi_venv"
+VENV_DIR = PROJECT_DIR / "venv"
 OLLAMA_URL = "http://localhost:11434"
 
 # This is a bootstrap script that may run under the bare system Python,
@@ -135,8 +135,7 @@ def run_desktop():
 def main():
     print("""
 ╔══════════════════════════════════════════════════════════╗
-║  Kurumi Tokisaki AI — Spirit of Time                      ║
-║  Nightmare · Zafkiel's Wielder · One-Click Launcher       ║
+║  CharacterEngine — One-Click Launcher                     ║
 ╚══════════════════════════════════════════════════════════╝
 """)
     
