@@ -1,6 +1,8 @@
 # CharacterEngine
 
-A local-first AI companion framework. A character lives on your machine as a persistent desktop presence, runs on a local model through [Ollama](https://ollama.com), and keeps its own state: relationship, mood, and memory all persist across restarts instead of resetting per session. The included reference character is Kurumi Tokisaki (Date A Live), defined entirely by one JSON config file.
+A modular Python framework for building AI characters with personality, memory, emotions, relationships, and decision-making.
+
+A character lives on your machine as a persistent desktop presence, runs on a local model through [Ollama](https://ollama.com), and keeps its own state: relationship, mood, and memory all persist across restarts instead of resetting per session. The included reference character is Kurumi Tokisaki (Date A Live), defined entirely by one JSON config file.
 
 The core idea: the LLM only handles expression. It turns structured state into dialogue. Everything that determines *what* the character does — whether trust is high enough to open up, whether she agrees to something, whether she speaks up unprompted — is decided by plain Python before the model ever runs, not by the model itself.
 
