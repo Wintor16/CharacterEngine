@@ -15,18 +15,23 @@ from PySide6.QtWidgets import (
 from desktop import theme
 from desktop.engine_worker import ReplyWorker
 
-# *Action beats* get a dimmer, italic style so they read as distinct from
-# spoken dialogue. Qt's rich text engine doesn't support CSS `opacity` on
-# inline spans reliably, so the "transparency" is done via an rgba() text
-# color instead (232,232,236 is theme.TEXT_PRIMARY).
-_ACTION_BEAT_RE = re.compile(r"\*([^*]+)\*")
+# *Action beats* AND (parenthetical action descriptions) both get a
+# dimmer, italic style so they read as clearly distinct from actual
+# spoken dialogue -- the model uses both markers roughly interchangeably
+# in practice, not just asterisks. Qt's rich text engine doesn't support
+# CSS `opacity` on inline spans reliably, so the "transparency" is done
+# via an rgba() text color instead (232,232,236 is theme.TEXT_PRIMARY).
+# Asterisks are pure markup and get dropped; parentheses are kept since
+# they read fine as natural punctuation once styled.
+_ACTION_BEAT_RE = re.compile(r"\*([^*]+)\*|\(([^)]+)\)")
 
 
 def _style_action_beats(text: str) -> str:
-    return _ACTION_BEAT_RE.sub(
-        r'<span style="color: rgba(232,232,236,0.55); font-style: italic;">\1</span>',
-        text,
-    )
+    def _replace(match):
+        inner = match.group(1) if match.group(1) is not None else f"({match.group(2)})"
+        return f'<span style="color: rgba(232,232,236,0.55); font-style: italic;">{inner}</span>'
+
+    return _ACTION_BEAT_RE.sub(_replace, text)
 
 
 class StatsPanel(QWidget):

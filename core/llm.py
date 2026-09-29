@@ -155,17 +155,19 @@ class LLM:
         
         # Get response_length from plan if available to adjust max tokens
         response_length = kwargs.get("response_length", "medium")
-        # "short" was 150 -- observed live cutting responses off
-        # mid-sentence before any real dialogue, because this character's
-        # habitual action-beat opener ("*golden eye flares, the clock
-        # ticks...*") alone can burn much of a small budget before she's
-        # said a word. Bumped for headroom; still meaningfully shorter
-        # than "medium".
+        # A first cut to 90/130/180/220 still produced 15/36/56/71-word
+        # replies that kept climbing turn over turn -- prompt instructions
+        # asking for brevity don't reliably hold on their own (same
+        # lesson as everything else in this file), so cut the actual
+        # token ceiling hard instead. Any resulting mid-sentence cutoff
+        # gets trimmed back to the last complete sentence below
+        # (_trim_incomplete_sentence), and the no-dialogue retry/fallback
+        # still guarantees real speech ships either way.
         length_token_map = {
-            "short": 190,
-            "medium": 200,
-            "medium-long": 280,
-            "long": 350
+            "short": 40,
+            "medium": 65,
+            "medium-long": 100,
+            "long": 140
         }
         if response_length in length_token_map:
             num_predict = length_token_map[response_length]
@@ -472,8 +474,25 @@ class LLM:
         text = self._limit_questions(text)
 
         text = self._post_process_cleanup(text)
-        
+
+        text = self._trim_incomplete_sentence(text)
+
         return text.strip()
+
+    def _trim_incomplete_sentence(self, text: str) -> str:
+        """If the token budget cut generation off mid-sentence, drop the
+        dangling fragment rather than ship a reply that trails into
+        nothing. Tighter budgets (see length_token_map) make this more
+        likely to actually trigger, so it needs to hold up on its own."""
+        stripped = text.rstrip()
+        if not stripped or stripped[-1] in '.!?"”’\'*)':
+            return text
+        last_end = None
+        for match in re.finditer(r'[.!?][\"”’\')]*', stripped):
+            last_end = match.end()
+        if last_end:
+            return stripped[:last_end]
+        return text  # no complete sentence at all -- nothing safe to cut back to
 
     def _limit_questions(self, text: str) -> str:
         """Flatten every question after the first into a statement.

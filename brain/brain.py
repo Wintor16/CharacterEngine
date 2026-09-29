@@ -53,23 +53,10 @@ class Brain:
         self.reasoning = ReasoningEngine()
         self.planner = Planner()
         self.school_context = SchoolContextEngine(character)
-        
-        # Load school lore into character
-        self._load_school_lore()
 
-    def _load_school_lore(self):
-        """Load school lore into character for brain access."""
-        import json
-
-        lore_path = settings.CHARACTERS_DIR / settings.DEFAULT_CHARACTER / "lore/school.json"
-        if lore_path.exists():
-            with open(lore_path, 'r', encoding='utf-8') as f:
-                self.school_lore = json.load(f)
-        else:
-            self.school_lore = {}
-        
-        # Add school context to character
-        self.character.school_lore = self.school_lore
+        # The single-file character loader already reads this into
+        # character.school_lore -- no separate file read needed.
+        self.school_lore = character.school_lore or {}
 
     def process(
         self,
