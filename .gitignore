@@ -1,12 +1,26 @@
 __pycache__/
 *.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 venv/
+.venv/
 .vscode/
+.idea/
 *.log
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
 config/user.toml
+.env
+.env.*
 
 # Runtime data: relationship/mood state and conversation history/memory.
 # This is personal to whoever is running the app, not project source.
 data/state/
 memory/*/
 memory/data.json
+*.db
+*.sqlite
+*.sqlite3

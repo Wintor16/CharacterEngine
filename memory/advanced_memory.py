@@ -6,6 +6,7 @@ from collections import deque
 import hashlib
 
 from config import settings
+from config.settings import safe_character_filename
 
 @dataclass
 class Memory:
@@ -45,7 +46,7 @@ class AdvancedMemorySystem:
         self.tag_index: Dict[str, List[str]] = {}
         
         # Load existing memories
-        self.memory_dir = settings.MEMORY_DIR / character_name
+        self.memory_dir = settings.MEMORY_DIR / safe_character_filename(character_name)
         self.memory_dir.mkdir(parents=True, exist_ok=True)
         self.load_memories()
 

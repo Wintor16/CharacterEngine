@@ -13,6 +13,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
+from config.settings import safe_character_filename
+
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
@@ -26,7 +28,7 @@ class Reminder:
 
 
 def _path(character_name: str) -> Path:
-    safe_name = character_name.replace("/", "_")
+    safe_name = safe_character_filename(character_name)
     return PROJECT_ROOT / "data" / "state" / f"{safe_name}_reminders.json"
 
 

@@ -1,4 +1,5 @@
 from config import settings
+from config.settings import safe_character_filename
 from memory.storage import MemoryStorage
 from memory.memory import Memory
 from memory.retriever import MemoryRetriever
@@ -19,7 +20,7 @@ class MemoryManager:
 
         log_path = None
         if character_name:
-            log_path = settings.MEMORY_DIR / character_name / "conversation_log.jsonl"
+            log_path = settings.MEMORY_DIR / safe_character_filename(character_name) / "conversation_log.jsonl"
 
         self.short_memory = ShortMemory(
             limit=short_memory_limit,

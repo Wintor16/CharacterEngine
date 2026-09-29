@@ -32,13 +32,16 @@ except Exception:
 # ──────────────
 
 def run(cmd, check=True, capture=False, bg=False):
-    """Run shell command."""
+    """Run a command given as an argv list. No shell=True -- avoids any
+    shell-metacharacter/quoting surface entirely rather than relying on
+    the values interpolated in (paths, the configured model name) never
+    containing anything unexpected."""
     cwd = str(PROJECT_DIR)
     if bg:
-        return subprocess.Popen(cmd, shell=True, cwd=cwd)
-    result = subprocess.run(cmd, shell=True, cwd=cwd, capture_output=capture, text=True)
+        return subprocess.Popen(cmd, cwd=cwd)
+    result = subprocess.run(cmd, cwd=cwd, capture_output=capture, text=True)
     if check and result.returncode != 0:
-        print(f"❌ Command failed: {cmd}")
+        print(f"❌ Command failed: {' '.join(cmd)}")
         print(result.stderr)
         sys.exit(1)
     return result
@@ -66,11 +69,11 @@ def ensure_venv():
     """Create venv and install packages."""
     if not VENV_DIR.exists():
         print("📦 Creating virtual environment...")
-        run(f'python3 -m venv "{VENV_DIR}"')
-    
+        run(["python3", "-m", "venv", str(VENV_DIR)])
+
     pip = VENV_DIR / "bin" / "pip"
     print("📦 Installing dependencies...")
-    run(f'"{pip}" install -q ollama fastapi uvicorn jinja2 PySide6')
+    run([str(pip), "install", "-q", "ollama", "fastapi", "uvicorn", "jinja2", "PySide6"])
 
 def ensure_ollama():
     """Start Ollama if not running."""
@@ -101,7 +104,7 @@ def ensure_model():
         return
     
     print(f"⬇️  Pulling model {MODEL} (this may take a minute)...")
-    run(f"ollama pull {MODEL}")
+    run(["ollama", "pull", MODEL])
     print("✅ Model ready")
 
 def run_cli():

@@ -7,6 +7,7 @@ project directory. Loads config/default.toml, merged with an optional
 config/user.toml (git-ignored) for local overrides.
 """
 
+import re
 import tomllib
 from pathlib import Path
 
@@ -16,6 +17,21 @@ CONFIG_DIR = PROJECT_ROOT / "config"
 CHARACTERS_DIR = PROJECT_ROOT / "characters"
 MEMORY_DIR = PROJECT_ROOT / "memory"
 DATA_DIR = PROJECT_ROOT / "data"
+
+# Character names come from user-authored JSON config (character/loader.py
+# reads identity.name out of characters/<name>.json) and end up embedded
+# directly in file paths across brain/persistence.py, scheduler/reminders.py,
+# and memory/*.py (per-character state/reminder/memory files). Since anyone
+# can write a character file, a name containing path separators or ".."
+# segments could otherwise escape the intended directory. Whitelist rather
+# than blacklist: only letters, digits, spaces, parens, underscore, and
+# hyphen survive -- everything else (including "/", "\", "..") becomes "_".
+_UNSAFE_NAME_CHARS = re.compile(r'[^A-Za-z0-9 ()_-]')
+
+
+def safe_character_filename(character_name: str) -> str:
+    name = _UNSAFE_NAME_CHARS.sub("_", character_name).strip()
+    return name or "character"
 
 
 def _load_toml(path: Path) -> dict:
@@ -61,12 +77,17 @@ REPEAT_PENALTY = get("llm", "repeat_penalty", default=1.15)
 NUM_PREDICT = get("llm", "num_predict", default=300)
 NUM_CTX = get("llm", "num_ctx", default=8192)
 
-WEB_HOST = get("web", "host", default="0.0.0.0")
+WEB_HOST = get("web", "host", default="127.0.0.1")
 WEB_PORT = get("web", "port", default=8000)
 
 HISTORY_LIMIT = get("memory", "history_limit", default=8)
 SHORT_TERM_LIMIT = get("memory", "short_term_limit", default=20)
 LONG_TERM_LIMIT = get("memory", "long_term_limit", default=1000)
+# HISTORY_LIMIT bounds the rolling conversation, but nothing previously
+# bounded a single message -- someone pasting a huge block of text would
+# go straight into the prompt uncapped. Generous enough not to bother
+# normal chat; just a backstop against a pathological single input.
+MAX_MESSAGE_CHARS = get("memory", "max_message_chars", default=4000)
 
 AUTOSTART_DELAY_SECONDS = get("autostart", "delay_seconds", default=10)
 

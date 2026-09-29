@@ -74,6 +74,21 @@ Settings live in `config/default.toml`: model, sampling parameters, memory limit
 
 Tool use, permissions, and an agent loop — the character can't act on your filesystem, browser, or other applications. Software integrations and mobile/web access are also out of scope for now. The current focus is the companion layer before adding capability.
 
+LLM support is Ollama-only right now (any model Ollama can run — the reference config uses `gemma3:4b`). No hosted-API providers are wired in.
+
+## Security
+
+- Model output is only ever used as display text — nothing evaluates it as code or a shell command, and there's no tool-execution path for it to reach yet (see "Not implemented").
+- A character definition is JSON data, not code. Loading a character you didn't write can't execute anything on its own.
+- The character name is sanitized before it's used to build file paths (`config/settings.py:safe_character_filename`), so a malicious character file can't write outside the intended data directories.
+- The browser UI (`python main.py web`) has no authentication on its endpoints, including the WebSocket chat. It binds to `127.0.0.1` by default for that reason — only widen `web.host` in `config/user.toml` if you understand you're exposing an unauthenticated chat interface.
+- `data/state/` and `memory/*/` hold your real relationship state and conversation history. They're git-ignored, but double-check before pushing a fork that already has local data in it.
+- This project hasn't had a professional security review. Treat it accordingly, particularly before exposing it beyond your own machine.
+
+## Contributing
+
+Issues and pull requests are welcome. Keep changes focused and consistent with the existing architecture — see `AUDIT_AND_PLAN.md` for the project's own incremental-development approach. Adding a new character needs only a JSON file under `characters/`, no code changes.
+
 ## Privacy
 
 `data/state/` and `memory/*/` are git-ignored. They hold relationship state and conversation history, which are runtime data specific to whoever is running the app.

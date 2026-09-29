@@ -14,6 +14,7 @@ from typing import Optional
 from brain.needs import Needs
 from brain.relationship import Relationship
 from brain.state import BrainState
+from config.settings import safe_character_filename
 
 STATE_SCHEMA_VERSION = 1
 
@@ -23,7 +24,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
 def _state_path(character_name: str) -> Path:
-    safe_name = character_name.replace("/", "_")
+    safe_name = safe_character_filename(character_name)
     return PROJECT_ROOT / "data" / "state" / f"{safe_name}.json"
 
 

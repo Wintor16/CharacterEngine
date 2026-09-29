@@ -22,7 +22,12 @@ num_predict = 300
 num_ctx = 8192
 
 [web]
-host = "0.0.0.0"
+# localhost-only by default: the web UI's endpoints (including the
+# WebSocket chat) have no authentication, so binding 0.0.0.0 would put
+# an unauthenticated chat interface on your whole local network. Only
+# widen this deliberately in config/user.toml if you understand that
+# tradeoff (e.g. reaching it from another device you own).
+host = "127.0.0.1"
 port = 8000
 
 [memory]
@@ -32,6 +37,10 @@ history_limit = 8
 # conversation history above -- see memory/advanced_memory.py).
 short_term_limit = 20
 long_term_limit = 1000
+# A single message longer than this gets truncated before it reaches
+# the LLM -- history_limit only bounds how many past turns stay in
+# context, not the length of any one of them.
+max_message_chars = 4000
 
 [autostart]
 # Seconds to wait after login before launching, in case the desktop

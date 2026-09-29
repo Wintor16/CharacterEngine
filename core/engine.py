@@ -57,6 +57,12 @@ class CharacterEngine:
         **llm_kwargs
     ):
         total_start = time.perf_counter()
+        # Nothing else bounds a single message's length -- HISTORY_LIMIT
+        # only caps how many past turns stay in context. Truncate rather
+        # than reject so an overly long paste still gets a real reply.
+        if len(user_message) > settings.MAX_MESSAGE_CHARS:
+            user_message = user_message[:settings.MAX_MESSAGE_CHARS]
+
         # A proactive utterance (she speaks up on her own -- see
         # brain/proactive.py) must NOT count as "the user interacted,"
         # or it would reset her own idle clock and the idle-time gate
