@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kurumi Tokisaki - Spirit of Time</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a25;
+            --accent-gold: #d4a843;
+            --accent-gold-dim: #8b7330;
+            --accent-red: #8b1a1a;
+            --text-primary: #f0e6d6;
+            --text-secondary: #a89b8a;
+            --text-muted: #6b5f4f;
+            --shadow-color: rgba(212, 168, 67, 0.3);
+            --shadow-dark: rgba(0, 0, 0, 0.8);
+        }
+
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .clock-face {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border: 2px solid var(--accent-gold-dim);
+            border-radius: 50%;
+            opacity: 0.05;
+            animation: rotate 60s linear infinite;
+        }
+
+        .clock-face:nth-child(1) { top: 10%; left: 5%; animation-duration: 80s; }
+        .clock-face:nth-child(2) { top: 60%; right: 10%; animation-duration: 100s; width: 200px; height: 200px; }
+        .clock-face:nth-child(3) { bottom: 20%; left: 20%; animation-duration: 120s; width: 150px; height: 150px; }
+
+        .clock-hand {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 2px;
+            height: 40%;
+            background: var(--accent-gold);
+            transform-origin: bottom center;
+            transform: translate(-50%, -100%) rotate(0deg);
+        }
+
+        .clock-hand.hour { height: 30%; width: 3px; }
+        .clock-hand.minute { height: 45%; width: 1px; animation: tick 60s steps(60) infinite; }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes tick {
+            from { transform: translate(-50%, -100%) rotate(0deg); }
+            to { transform: translate(-50%, -100%) rotate(360deg); }
+        }
+
+        .shadow-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--accent-gold);
+            border-radius: 50%;
+            opacity: 0;
+            animation: float 15s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { opacity: 0; transform: translateY(100vh) scale(0); }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { opacity: 0; transform: translateY(-100vh) scale(1); }
+        }
+
+        /* Header */
+        header {
+            padding: 2rem 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid var(--accent-gold-dim);
+            position: relative;
+        }
+
+        header::before {
+            content: "";
+            position: absolute;
+            bottom: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: normal;
+            letter-spacing: 0.1em;
+            color: var(--accent-gold);
+            text-shadow: 0 0 20px var(--shadow-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-style: italic;
+            letter-spacing: 0.05em;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-gold);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 5px var(--accent-gold); }
+            50% { opacity: 0.5; box-shadow: 0 0 15px var(--accent-gold); }
+        }
+
+        /* Chat Area */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .message {
+            display: flex;
+            gap: 1rem;
+            animation: fadeIn 0.4s ease-out;
+            max-width: 85%;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message.kurumi {
+            align-self: flex-start;
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            box-shadow: 0 0 15px var(--shadow-dark);
+        }
+
+        .avatar.kurumi {
+            background: linear-gradient(135deg, #1a0a0a, #2d1a1a);
+            border: 2px solid var(--accent-gold);
+            color: var(--accent-gold);
+        }
+
+        .avatar.user {
+            background: linear-gradient(135deg, #0a1a2d, #1a2d3a);
+            border: 2px solid var(--text-muted);
+            color: var(--text-secondary);
+        }
+
+        .avatar.system {
+            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+            border: 2px solid var(--accent-gold-dim);
+            color: var(--accent-gold-dim);
+        }
+
+        .message-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            position: relative;
+            line-height: 1.7;
+            font-size: 1rem;
+        }
+
+        .message.kurumi .message-content {
+            border-left: 3px solid var(--accent-gold);
+            box-shadow: 0 4px 20px rgba(212, 168, 67, 0.1);
+        }
+
+        .message.user .message-content {
+            border-right: 3px solid var(--text-muted);
+            background: var(--bg-tertiary);
+        }
+
+        .message.system .message-content {
+            border: 1px dashed var(--accent-gold-dim);
+            background: rgba(212, 168, 67, 0.05);
+            font-style: italic;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .action-beat {
+            opacity: 0.6;
+            font-style: italic;
+        }
+
+        .message-time {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            text-align: right;
+        }
+
+        .message.kurumi .message-time {
+            text-align: left;
+        }
+
+        /* Thinking indicator */
+        .thinking {
+            display: flex;
+            gap: 1rem;
+            align-self: flex-start;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .thinking .avatar {
+            animation: none;
+        }
+
+        .thinking-dots {
+            display: flex;
+            gap: 4px;
+            padding: 1rem 1.25rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--bg-tertiary);
+            border-radius: 12px;
+            border-left: 3px solid var(--accent-gold);
+        }
+
+        .thinking-dots span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-gold);
+            animation: thinkingBounce 1.4s ease-in-out infinite both;
+        }
+
+        .thinking-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .thinking-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes thinkingBounce {
+            0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Input Area */
+        .input-area {
+            padding: 1.5rem;
+            border-top: 1px solid var(--accent-gold-dim);
+            background: var(--bg-secondary);
+        }
+
+        .input-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-end;
+        }
+
+        .input-field {
+            flex: 1;
+            background: var(--bg-primary);
+            border: 2px solid var(--bg-tertiary);
+            border-radius: 10px;
+            padding: 0.875rem 1.25rem;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1rem;
+            line-height: 1.5;
+            resize: none;
+            min-height: 56px;
+            max-height: 150px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 0 3px rgba(212, 168, 67, 0.2);
+        }
+
+        .input-field::placeholder {
+            color: var(--text-muted);
+        }
+
+        .send-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--accent-gold), #b89030);
+            border: none;
+            color: var(--bg-primary);
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(212, 168, 67, 0.4);
+        }
+
+        .send-btn:active {
+            transform: scale(0.95);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Mood indicator */
+        .mood-indicator {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: bold;
+        }
+
+        .mood-amused { background: rgba(212, 168, 67, 0.2); color: var(--accent-gold); }
+        .mood-playful { background: rgba(212, 168, 67, 0.2); color: var(--accent-gold); }
+        .mood-curious { background: rgba(100, 200, 100, 0.2); color: #64c864; }
+        .mood-wary { background: rgba(212, 168, 67, 0.2); color: var(--accent-gold); }
+        .mood-cold { background: rgba(100, 100, 200, 0.2); color: #6464c8; }
+        .mood-intimidating { background: rgba(200, 50, 50, 0.2); color: #c83232; }
+        .mood-complex { background: rgba(200, 100, 200, 0.2); color: #c864c8; }
+        .mood-touched { background: rgba(200, 150, 100, 0.2); color: #c89664; }
+        .mood-neutral { background: rgba(150, 150, 150, 0.2); color: #969696; }
+        .mood-pleasant { background: rgba(100, 200, 150, 0.2); color: #64c896; }
+        .mood-confident { background: rgba(212, 168, 67, 0.3); color: var(--accent-gold); }
+        .mood-determined { background: rgba(200, 100, 50, 0.2); color: #c86432; }
+        .mood-nostalgic { background: rgba(150, 100, 200, 0.2); color: #9664c8; }
+        .mood-thoughtful { background: rgba(100, 150, 200, 0.2); color: #6496c8; }
+        .mood-tired { background: rgba(150, 150, 150, 0.3); color: #969696; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-gold-dim);
+        }
+
+        /* Mobile */
+        @media (max-width: 600px) {
+            .title { font-size: 1.75rem; }
+            .message { max-width: 95%; }
+            .status-bar { flex-wrap: wrap; gap: 1rem; }
+            .input-area { padding: 1rem; }
+        }
+
+        /* Selection */
+        ::selection {
+            background: var(--accent-gold);
+            color: var(--bg-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation" id="bgAnimation">
+        <div class="clock-face">
+            <div class="clock-hand hour"></div>
+            <div class="clock-hand minute"></div>
+        </div>
+        <div class="clock-face">
+            <div class="clock-hand hour"></div>
+            <div class="clock-hand minute"></div>
+        </div>
+        <div class="clock-face">
+            <div class="clock-hand hour"></div>
+            <div class="clock-hand minute"></div>
+        </div>
+    </div>
+
+    <header>
+        <h1 class="title">KURUMI TOKISAKI</h1>
+        <p class="subtitle">Spirit of Time · Nightmare · Zafkiel's Wielder</p>
+        <div class="status-bar">
+            <div class="status-item">
+                <span class="status-dot" id="statusDot"></span>
+                <span>Connected</span>
+            </div>
+            <div class="status-item">
+                <span id="modelInfo">gemma3:4b</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="chat-container">
+        <div class="messages" id="messages"></div>
+        
+        <div class="input-area">
+            <div class="input-wrapper">
+                <textarea 
+                    class="input-field" 
+                    id="messageInput" 
+                    placeholder="Speak... The clock is listening."
+                    rows="1"
+                ></textarea>
+                <button class="send-btn" id="sendBtn" aria-label="Send">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // WebSocket connection
+        const clientId = 'client_' + Math.random().toString(36).substr(2, 9);
+        const ws = new WebSocket(`ws://${window.location.host}/ws/${clientId}`);
+        
+        const messagesEl = document.getElementById('messages');
+        const inputEl = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const statusDot = document.getElementById('statusDot');
+        
+        let thinkingEl = null;
+        
+        // Auto-resize textarea
+        inputEl.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+        });
+        
+        // Send message
+        function sendMessage() {
+            const text = inputEl.value.trim();
+            if (!text) return;
+            
+            // Add user message to UI
+            addMessage(text, 'user');
+            
+            // Send via WebSocket
+            ws.send(JSON.stringify({
+                type: 'message',
+                content: text
+            }));
+            
+            // Clear input
+            inputEl.value = '';
+            inputEl.style.height = 'auto';
+            inputEl.focus();
+        }
+        
+        sendBtn.addEventListener('click', sendMessage);
+        
+        inputEl.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        // WebSocket handlers
+        ws.onopen = function() {
+            statusDot.style.background = '#64c864';
+            statusDot.style.boxShadow = '0 0 5px #64c864, 0 0 15px #64c864';
+        };
+        
+        ws.onclose = function() {
+            statusDot.style.background = '#c83232';
+            statusDot.style.boxShadow = '0 0 5px #c83232';
+            addMessage('Connection lost. The shadows have severed the link.', 'system');
+        };
+        
+        ws.onerror = function(error) {
+            console.error('WebSocket error:', error);
+        };
+        
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            
+            switch (data.type) {
+                case 'message':
+                    if (thinkingEl) {
+                        thinkingEl.remove();
+                        thinkingEl = null;
+                    }
+                    addMessage(data.content, data.sender, data.metadata);
+                    break;
+                    
+                case 'thinking':
+                    showThinking();
+                    break;
+                    
+                case 'system':
+                    addMessage(data.content, 'system');
+                    break;
+                    
+                case 'error':
+                    if (thinkingEl) {
+                        thinkingEl.remove();
+                        thinkingEl = null;
+                    }
+                    addMessage(data.content, 'system');
+                    break;
+            }
+        };
+        
+        function addMessage(content, sender, metadata = {}) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            let avatarChar = '?';
+            let avatarClass = 'user';
+            
+            if (sender === 'kurumi') {
+                avatarChar = '⏳';
+                avatarClass = 'kurumi';
+            } else if (sender === 'user') {
+                avatarChar = '👤';
+                avatarClass = 'user';
+            } else {
+                avatarChar = '⚙';
+                avatarClass = 'system';
+            }
+            
+            let moodBadge = '';
+            if (metadata.mood) {
+                moodBadge = `<span class="mood-indicator mood-${metadata.mood}">${metadata.mood}</span> `;
+            }
+            
+            messageDiv.innerHTML = `
+                <div class="avatar ${avatarClass}">${avatarChar}</div>
+                <div class="message-content">
+                    ${moodBadge}${formatActionBeats(escapeHtml(content)).replace(/\n/g, '<br>')}
+                    <div class="message-time">${timeStr}</div>
+                </div>
+            `;
+            
+            messagesEl.appendChild(messageDiv);
+            scrollToBottom();
+        }
+        
+        function showThinking() {
+            thinkingEl = document.createElement('div');
+            thinkingEl.className = 'thinking';
+            thinkingEl.innerHTML = `
+                <div class="avatar kurumi">⏳</div>
+                <div class="thinking-dots">
+                    <span></span><span></span><span></span>
+                </div>
+            `;
+            messagesEl.appendChild(thinkingEl);
+            scrollToBottom();
+        }
+        
+        function scrollToBottom() {
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatActionBeats(escapedText) {
+            // *Action beats* render dimmer + italic so they read as
+            // distinct from spoken dialogue. Runs after escapeHtml, so
+            // the text is already safe - only '*' delimiters are touched.
+            return escapedText.replace(/\*([^*]+)\*/g, '<span class="action-beat">$1</span>');
+        }
+        
+        // Create floating shadow particles
+        function createParticles() {
+            const bg = document.getElementById('bgAnimation');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'shadow-particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+                bg.appendChild(particle);
+            }
+        }
+        
+        // Initialize
+        createParticles();
+        inputEl.focus();
+        
+        // Welcome message after short delay
+        setTimeout(() => {
+            addMessage('*The air grows colder. Shadows gather at the edges of the room. A figure emerges from the darkness—elegant, dangerous, smiling.*\n\n"Ara ara~ A visitor? How... unexpected. And what brings you to this particular moment in time, I wonder?"', 'kurumi', {mood: 'amused'});
+        }, 500);
+    </script>
+</body>
+</html>

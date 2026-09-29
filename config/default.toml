@@ -1,0 +1,56 @@
+# Default settings for CharacterEngine. Do not put secrets here.
+# Local overrides that shouldn't be committed go in config/user.toml
+# (git-ignored) -- any key set there wins over this file.
+
+[character]
+default = "kurumi"
+
+[llm]
+# Switched from the 7.7GB Noromaid-Mistral RP model back to gemma3:4b:
+# Noromaid doesn't fit in a 6GB GPU, forcing CPU offload, which measured
+# at ~9-10s per response and competed with other CPU-heavy use (games)
+# for resources. gemma3:4b fits entirely in VRAM and measured ~2.5s once
+# warm, with comparable quality now that the pipeline bugs that made it
+# look bad originally (prompt overflow, keyword false-positives, memory
+# poisoning) are fixed -- those were never actually model-specific.
+model = "gemma3:4b"
+temperature = 0.85
+top_p = 0.92
+top_k = 40
+repeat_penalty = 1.15
+num_predict = 300
+num_ctx = 8192
+
+[web]
+host = "0.0.0.0"
+port = 8000
+
+[memory]
+# Messages of conversation history sent to the LLM each turn.
+history_limit = 8
+# AdvancedMemorySystem's in-memory short-term buffer (not the same as
+# conversation history above -- see memory/advanced_memory.py).
+short_term_limit = 20
+long_term_limit = 1000
+
+[autostart]
+# Seconds to wait after login before launching, in case the desktop
+# session/network isn't fully up yet. 0 = launch immediately.
+delay_seconds = 10
+
+[proactive]
+enabled = true
+# How often the desktop app checks whether to speak up. Most checks end
+# in silence -- see brain/proactive.py's actual gating below.
+check_interval_minutes = 5
+# Minimum quiet time before there's anything to say at all.
+min_idle_minutes = 20
+# Hard floor between two proactive messages, however often the check
+# above runs -- the actual anti-spam guarantee.
+min_gap_minutes = 30
+
+[scheduler]
+# How often the desktop app checks for due reminders. Finer-grained than
+# the proactive check above since a reminder should fire close to its
+# actual due time, not up to 5 minutes late.
+check_interval_seconds = 30

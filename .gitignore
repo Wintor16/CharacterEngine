@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+venv/
+.vscode/
+*.log
+config/user.toml
+
+# Runtime data: relationship/mood state and conversation history/memory.
+# This is personal to whoever is running the app, not project source.
+data/state/
+memory/*/
+memory/data.json
