@@ -42,6 +42,8 @@ python main.py web       # browser UI
 
 CLI commands: `/stats`, `/memory`, `/reset`, `exit`.
 
+Optional: `./install-desktop-entry.sh` adds a "CharacterEngine" launcher to your application menu, pointing at this checkout. (There's no static `.desktop` file in the repo for this — `Exec=`/`Icon=` need absolute paths, so it's generated locally instead of hardcoding whoever's machine first wrote it.)
+
 ## Defining a character
 
 A character is one JSON file at `characters/<name>.json`:

@@ -24,3 +24,7 @@ memory/data.json
 *.db
 *.sqlite
 *.sqlite3
+
+# Generated locally by install-desktop-entry.sh; would hardcode this
+# machine's absolute path if committed.
+/CharacterEngine.desktop
