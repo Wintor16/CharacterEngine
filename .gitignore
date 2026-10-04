@@ -28,3 +28,8 @@ memory/data.json
 # Generated locally by install-desktop-entry.sh; would hardcode this
 # machine's absolute path if committed.
 /CharacterEngine.desktop
+
+# Internal planning/audit notes: kept locally, not published.
+/AUDIT_AND_PLAN.md
+/MASTER_SPEC.md
+/SECURITY_AUDIT.md
